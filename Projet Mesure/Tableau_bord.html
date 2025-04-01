@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
     <title>Mesure_De</title>
     <link rel="stylesheet" href="assets/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightpick@1.3.4/css/lightpick.min.css">
     <link rel="stylesheet" href="assets/css/Main_login.css">
     <link rel="stylesheet" href="assets/css/Tableau_bord.css">
 </head>
@@ -14,16 +15,21 @@
     <div class="page">
         <div class="container_h"><img src="assets/img/equans-smi.svg" width="230" height="110"></div>
         <div class="element">
-            <div class="parametre"><button class="btn parametre-btn" type=""><span class="bar bar1"></span><span class="bar bar2"></span><span class="bar bar3"></span></button></div>
-            <div><label class="form-label">Avant travaux</label><input type="text" id="datePicker" class="Tag1">
-                <div><label class="form-label">Après-travaux</label><input type="text" id="dateRangePicker"></div>
+            <div class="icon"><button class="btn parametre-btn" type=""><span class="bar bar1"></span><span class="bar bar2"></span><span class="bar bar3"></span></button></div>
+            <div class="content">
+                <div class="date-picker-group">
+                    <div class="date-picker"><label class="form-label">Avant travaux</label><input type="text" id="dateRangePicked1"></div>
+                    <div class="date-picker"><label class="form-label">Après travaux</label><input type="text" id="dateRangePicker2"></div>
+                </div>
             </div>
         </div>
+        <div id="graph"></div>
     </div>
     <script src="assets/bootstrap/js/bootstrap.min.js"></script>
-    <script src="assets/js/datepicker.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/lightpick@1.3.4/lightpick.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/litepicker/2.0.11/litepicker.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="assets/js/Main_login.js"></script>
     <script src="assets/js/Tableau_bord.js"></script>
 </body>

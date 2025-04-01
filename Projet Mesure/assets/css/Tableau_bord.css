@@ -80,3 +80,48 @@
   transform: translateX(4px);
 }
 
+.element {
+  display: flex;
+  align-items: center;
+  background: white;
+  padding: 20px;
+  width: 100%;
+}
+
+.icon {
+  background-color: rgb(110,187,148);
+  border-radius: 10px;
+  margin-left: 150px;
+}
+
+.content {
+  flex: 1;
+}
+
+.date-picker-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.date-picker {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+  flex-direction: row;
+  justify-content: flex-end;
+  margin-right: 150px;
+}
+
+.date-picker label {
+  margin-right: 10px;
+  font-weight: bold;
+}
+
+.date-picker input {
+  border: 1px solid #ccc;
+  border-radius: 20px;
+  padding: 5px;
+  width: 200px;
+  text-align: left;
+}
+
