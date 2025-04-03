@@ -121,7 +121,32 @@
   border: 1px solid #ccc;
   border-radius: 20px;
   padding: 5px;
-  width: 200px;
+  width: 225px;
   text-align: left;
+}
+
+.date-input-container {
+  position: relative;
+  display: inline-block;
+}
+
+.date-input-container img {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  width: 20px;
+  height: auto;
+}
+
+.date-input-container input {
+  padding-right: 30px;
+}
+
+#chartjs-bar {
+  width: 100%;
+  height: auto;
+  padding: 30px;
 }
 
