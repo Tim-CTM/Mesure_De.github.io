@@ -105,11 +105,10 @@
 
 .date-picker {
   display: flex;
-  align-items: center;
   margin-bottom: 10px;
-  flex-direction: row;
   justify-content: flex-end;
   margin-right: 150px;
+  flex-direction: row;
 }
 
 .date-picker label {
@@ -148,5 +147,41 @@
   width: 100%;
   height: auto;
   padding: 30px;
+}
+
+.container_g {
+  padding: 40px;
+}
+
+.container_e {
+  display: flex;
+  flex-direction: row;
+  align-content: center;
+  justify-content: flex-end;
+}
+
+.container_e button {
+  width: 100px;
+  height: auto;
+  padding: 10px;
+  margin-right: 20px;
+}
+
+.PDF {
+  color: white;
+  background-color: red;
+}
+
+.CSV {
+  color: white;
+  background-color: forestgreen;
+}
+
+#PDF {
+  border-radius: 10px;
+}
+
+#CSV {
+  border-radius: 10px;
 }
 

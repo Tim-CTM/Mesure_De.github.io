@@ -17,77 +17,30 @@
             <div class="icon"><button class="btn parametre-btn" type=""><span class="bar bar1"></span><span class="bar bar2"></span><span class="bar bar3"></span></button></div>
             <div class="content">
                 <div class="date-picker-group">
-                    <div class="date-picker"><label class="form-label">Avant travaux</label><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightpick@1.3.4/css/lightpick.min.css">
+                    <div class="date-picker"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightpick@1.3.4/css/lightpick.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/lightpick@1.3.4/lightpick.min.js"></script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 <div class="date-input-container">
-    <input type="text" id="dateRangePicker1">
+    <input type="text" id="dateRangePicker">
     <img src="assets/img/calender.webp" alt="Calendar Icon" id="calendarIcon">
 </div>
 
-<script>
-    $(function(){
-        moment.locale('fr');
-        let dateRangePicker1 = document.getElementById('dateRangePicker1');
-        let pickerRange1 = new Lightpick({
-            field: dateRangePicker1,
-            singleDate: false,
-            onSelect: function(start, end){
-                let str = '';
-                str += start ? start.format('DD/MM/YYYY') + ' - ' : '';
-                str += end ? end.format('DD/MM/YYYY') : '...';
-                dateRangePicker1.value = str;
-            }
-        });
-        document.getElementById('calendarIcon').addEventListener('click', function() {
-            pickerRange1.show();
-        });
-    });
-</script>
-</div>
-                    <div class="date-picker"><label class="form-label">Après travaux</label><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightpick@1.3.4/css/lightpick.min.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/lightpick@1.3.4/lightpick.min.js"></script>
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
-<div class="date-input-container">
-    <input type="text" id="dateRangePicker2">
-    <img src="assets/img/calender.webp" alt="Calendar Icon" id="calendarIcon">
-</div>
-
-<script>
-    $(function(){
-        moment.locale('fr');
-        let dateRangePicker2 = document.getElementById('dateRangePicker2');
-        let pickerRange2 = new Lightpick({
-            field: dateRangePicker2,
-            singleDate: false,
-            onSelect: function(start, end){
-                let str = '';
-                str += start ? start.format('DD/MM/YYYY') + ' - ' : '';
-                str += end ? end.format('DD/MM/YYYY') : '...';
-                dateRangePicker1.value = str;
-            }
-        });
-        document.getElementById('calendarIcon').addEventListener('click', function() {
-            pickerRange2.show();
-        });
-    });
-</script>
 </div>
                 </div>
             </div>
         </div>
-        <div class="container-g"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightpick@1.3.4/css/lightpick.min.css">
+        <div class="container_g"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightpick@1.3.4/css/lightpick.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/lightpick@1.3.4/lightpick.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 <canvas id="chartjs-bar" width="180" height="60"></canvas>
 
-<script>
+    <script>
         const ctx = document.getElementById('chartjs-bar').getContext('2d');
         let chart;
         const data = {
@@ -98,15 +51,46 @@
             "2025-04-17": 3.2, "2025-04-18": 1.8, "2025-04-19": 3.4, "2025-04-20": 6.6,
             "2025-04-21": 7.0, "2025-04-22": 2.9, "2025-04-23": 3.6, "2025-04-24": 3.1,
             "2025-04-25": 3.2, "2025-04-26": 7.2, "2025-04-27": 3.5, "2025-04-28": 3.0,
-            "2025-04-29": 3.4, "2025-04-30": 9.4
+            "2025-04-29": 3.4, "2025-04-30": 9.4,
+            "2025-05-01": 2.9, "2025-05-02": 3.5, "2025-05-03": 2.5, "2025-05-04": 4.1,
+            "2025-05-05": 6.2, "2025-05-06": 3.8, "2025-05-07": 3.3, "2025-05-08": 2.9,
+            "2025-05-09": 1.5, "2025-05-10": 4.0, "2025-05-11": 3.1, "2025-05-12": 3.8,
+            "2025-05-13": 3.5, "2025-05-14": 4.5, "2025-05-15": 7.5, "2025-05-16": 3.5,
+            "2025-05-17": 3.7, "2025-05-18": 12.5, "2025-05-19": 3.9, "2025-05-20": 7.1,
+            "2025-05-21": 7.5, "2025-05-22": 3.3, "2025-05-23": 4.0, "2025-05-24": 3.5,
+            "2025-05-25": 3.6, "2025-05-26": 7.8, "2025-05-27": 4.0, "2025-05-28": 3.4,
+            "2025-05-29": 3.8, "2025-05-30": 9.0, "2025-05-31": 4.2,
+            "2025-06-01": 3.1, "2025-06-02": 3.7, "2025-06-03": 2.7, "2025-06-04": 4.3,
+            "2025-06-05": 6.5, "2025-06-06": 4.0, "2025-06-07": 3.5, "2025-06-08": 3.1,
+            "2025-06-09": 1.7, "2025-06-10": 4.2, "2025-06-11": 3.3, "2025-06-12": 4.0,
+            "2025-06-13": 3.7, "2025-06-14": 4.7, "2025-06-15": 7.8, "2025-06-16": 3.7,
+            "2025-06-17": 3.9, "2025-06-18": 2.4, "2025-06-19": 4.1, "2025-06-20": 7.4,
+            "2025-06-21": 7.8, "2025-06-22": 3.5, "2025-06-23": 4.2, "2025-06-24": 3.7,
+            "2025-06-25": 3.8, "2025-06-26": 8.1, "2025-06-27": 4.2, "2025-06-28": 3.6,
+            "2025-06-29": 4.0, "2025-06-30": 9.2
         };
 
-        function updateChart() {
-            const labels = Object.keys(data);
-            const values = labels.map(date => data[date]);
+        let currentStartDate;
+        let currentEndDate;
+
+        function updateChart(startDate, endDate) {
+            currentStartDate = startDate;
+            currentEndDate = endDate;
+
+            const filteredData = Object.keys(data)
+                .filter(date => moment(date).isBetween(startDate, endDate, undefined, '[]'))
+                .reduce((obj, key) => {
+                    obj[key] = data[key];
+                    return obj;
+                }, {});
+
+            const labels = Object.keys(filteredData);
+            const values = labels.map(date => filteredData[date]);
+
             if (chart) {
                 chart.destroy();
             }
+
             chart = new Chart(ctx, {
                 type: 'bar',
                 data: {
@@ -132,6 +116,11 @@
                             title: {
                                 display: true,
                                 text: 'kWh'
+                            },
+                            ticks:{
+                                font:{
+                                    size: 20
+                                }
                             }
                         },
                         x: {
@@ -141,7 +130,10 @@
                             },
                             ticks:{
                                 maxRotation: 90,
-                                minRotation: 90
+                                minRotation: 90,
+                                font:{
+                                    size: 20
+                                }
                             }
                         }
                     }
@@ -154,13 +146,104 @@
             const container = canvas.parentNode;
             canvas.width = container.clientWidth;
             canvas.height = container.clientHeight;
-            updateChart();
+            // Utilise les dates stockées si elles existent, sinon affiche les 30 derniers jours
+            if (currentStartDate && currentEndDate) {
+                updateChart(currentStartDate, currentEndDate);
+            } else {
+                updateChart(moment().subtract(30, 'days'), moment());
+            }
         }
 
         window.addEventListener('resize', resizeCanvas);
-        updateChart();
-        resizeCanvas(); // Initial resize to set correct dimensions
-    </script>
+
+        $(function(){
+            moment.locale('fr');
+            let dateRangePicker = document.getElementById('dateRangePicker');
+            let pickerRange = new Lightpick({
+                field: dateRangePicker,
+                singleDate: false,
+                onSelect: function(start, end){
+                    let str = '';
+                    str += start ? start.format('DD/MM/YYYY') + ' - ' : '';
+                    str += end ? end.format('DD/MM/YYYY') : '...';
+                    dateRangePicker.value = str;
+                    updateChart(start, end);
+                }
+            });
+            document.getElementById('calendarIcon').addEventListener('click', function() {
+                pickerRange.show();
+            });
+            // Initialisation du graphique avec les 30 derniers jours
+            updateChart(moment().subtract(30, 'days'), moment());
+            resizeCanvas();
+        });
+    </script></div>
+        <div class="container_e"><script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+
+<button class='PDF' id="PDF">PDF</button>
+<button class='CSV' id="CSV">CSV</button>
+
+<script>
+    document.getElementById('PDF').addEventListener('click', function() {
+        exportToPDF();
+    });
+
+    /*
+    document.getElementById('CSV').addEventListener('click', function() {
+        exportToCSV();
+    });
+    */
+
+    async function exportToPDF() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF('landscape'); // Utiliser le format paysage pour plus d'espace
+
+        // Ajouter le titre
+        doc.text("Graphique de Consommation", 10, 10);
+
+        // Ajouter le graphique (vous pouvez utiliser une capture d'écran ou dessiner le graphique)
+        const canvas = document.getElementById('chartjs-bar');
+        const imgData = canvas.toDataURL('image/png');
+
+        // Agrandir l'image du graphique
+        const imgWidth = 250; // Largeur de l'image dans le PDF
+        const imgHeight = 150; // Hauteur de l'image dans le PDF
+        doc.addImage(imgData, 'PNG', 10, 20, imgWidth, imgHeight);
+
+        // Sauvegarder le PDF
+        doc.save('graphique.pdf');
+    }
+
+    /*
+    async function exportToCSV() {
+        const data = await fetchData(); // Réutilisez la fonction fetchData pour obtenir les données
+
+        // Convertir les données en CSV
+        const csv = Papa.unparse(data);
+
+        // Créer un blob à partir des données CSV
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+
+        // Créer un lien pour télécharger le fichier CSV
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'donnees.csv';
+        document.body.appendChild(a);
+        a.click();
+
+        // Nettoyer
+        URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+    }
+    */
+
+    async function fetchData() {
+        const response = await fetch('data.php');
+        return await response.json();
+    }
+</script>
 </div>
     </div>
     <script src="assets/bootstrap/js/bootstrap.min.js"></script>
