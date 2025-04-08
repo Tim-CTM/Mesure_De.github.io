@@ -27,7 +27,29 @@
     <img src="assets/img/calender.webp" alt="Calendar Icon" id="calendarIcon">
 </div>
 
-</div>
+<script>
+            $(function(){
+            moment.locale('fr');
+            let dateRangePicker = document.getElementById('dateRangePicker');
+            let pickerRange = new Lightpick({
+                field: dateRangePicker,
+                singleDate: false,
+                onSelect: function(start, end){
+                    let str = '';
+                    str += start ? start.format('DD/MM/YYYY') + ' - ' : '';
+                    str += end ? end.format('DD/MM/YYYY') : '...';
+                    dateRangePicker.value = str;
+                    updateChart(start, end);
+                }
+            });
+            document.getElementById('calendarIcon').addEventListener('click', function() {
+                pickerRange.show();
+            });
+            // Initialisation du graphique avec les 30 derniers jours
+            updateChart(moment().subtract(30, 'days'), moment());
+            resizeCanvas();
+        });
+</script></div>
                 </div>
             </div>
         </div>
@@ -156,27 +178,7 @@
 
         window.addEventListener('resize', resizeCanvas);
 
-        $(function(){
-            moment.locale('fr');
-            let dateRangePicker = document.getElementById('dateRangePicker');
-            let pickerRange = new Lightpick({
-                field: dateRangePicker,
-                singleDate: false,
-                onSelect: function(start, end){
-                    let str = '';
-                    str += start ? start.format('DD/MM/YYYY') + ' - ' : '';
-                    str += end ? end.format('DD/MM/YYYY') : '...';
-                    dateRangePicker.value = str;
-                    updateChart(start, end);
-                }
-            });
-            document.getElementById('calendarIcon').addEventListener('click', function() {
-                pickerRange.show();
-            });
-            // Initialisation du graphique avec les 30 derniers jours
-            updateChart(moment().subtract(30, 'days'), moment());
-            resizeCanvas();
-        });
+
     </script></div>
         <div class="container_e"><script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
@@ -197,20 +199,12 @@
 
     async function exportToPDF() {
         const { jsPDF } = window.jspdf;
-        const doc = new jsPDF('landscape'); // Utiliser le format paysage pour plus d'espace
-
-        // Ajouter le titre
-        doc.text("Graphique de Consommation", 10, 10);
-
-        // Ajouter le graphique (vous pouvez utiliser une capture d'écran ou dessiner le graphique)
+        const doc = new jsPDF('landscape'); //Paysage
         const canvas = document.getElementById('chartjs-bar');
         const imgData = canvas.toDataURL('image/png');
-
-        // Agrandir l'image du graphique
         const imgWidth = 250; // Largeur de l'image dans le PDF
         const imgHeight = 150; // Hauteur de l'image dans le PDF
         doc.addImage(imgData, 'PNG', 10, 20, imgWidth, imgHeight);
-
         // Sauvegarder le PDF
         doc.save('graphique.pdf');
     }
@@ -245,6 +239,25 @@
     }
 </script>
 </div>
+        <div class="test"><button onclick="testerConnexion()">Tester la connexion</button>
+<div id="resultat"></div>
+
+<script>
+    function testerConnexion() {
+        var resultatDiv = document.getElementById("resultat");
+        resultatDiv.innerHTML = "En cours de test";
+
+        fetch('database.php')
+            .then(response => response.text())
+            .then(data => {
+                resultatDiv.innerHTML = data;
+            })
+            .catch(error => {
+                resultatDiv.innerHTML = "Erreur serveur.";
+                console.error('Erreur:', error);
+            });
+    }
+</script></div>
     </div>
     <script src="assets/bootstrap/js/bootstrap.min.js"></script>
     <script src="assets/js/Main_login.js"></script>
