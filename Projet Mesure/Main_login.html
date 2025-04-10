@@ -18,7 +18,13 @@
                 <form id="loginForm">
                     <div class="form-grp"><label class="form-label">Identifiant</label><input class="form-control black-ligne" type="text" id="identifiant"></div>
                     <div class="form-grp"><label class="form-label">Mot de passe</label><input class="form-control black-ligne" type="text" id="password"></div>
-                    <div class="form-grp"><a id="oubliemdp" class="url" href="#">Mot de passe oublié ?</a></div><button class="btn btn-primary login-button" id="button-login" type="button">Connexion</button>
+                    <div class="form-grp"><a id="oubliemdp" class="url" href="#">Mot de passe oublié ?</a></div><button id="button-login" class="btn btn-primary login-button" type="button">Connexion</button>
+
+<script>
+  document.getElementById("button-login").addEventListener("click", function() {
+    window.location.href = "Tableau_bord.html";
+  });
+</script>
                 </form>
             </div>
         </div>

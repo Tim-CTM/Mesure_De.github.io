@@ -239,21 +239,42 @@
     }
 </script>
 </div>
-        <div class="test"><button onclick="testerConnexion()">Tester la connexion</button>
+        <div class="test"><button onclick="testerConnexion()">Test de connexion et vérification </button>
 <div id="resultat"></div>
 
 <script>
     function testerConnexion() {
         var resultatDiv = document.getElementById("resultat");
-        resultatDiv.innerHTML = "En cours de test";
+        resultatDiv.innerHTML = "En cour de test...";
 
-        fetch('database.php')
-            .then(response => response.text())
+        fetch('database.php') // Assure-toi que ton fichier PHP renvoie toujours le 'timestamp' et la 'valeur'
+            .then(response => response.json())
             .then(data => {
-                resultatDiv.innerHTML = data;
+                const sumsByDate = {}; // On crée un objet vide pour stocker les sommes par date
+
+                data.forEach(item => {
+                    const datePart = item.timestamp ? item.timestamp.substring(0, 10) : 'N/A'; // On prend la date
+                    const valeur = parseFloat(item.valeur); // On convertit la valeur en nombre
+
+                    if (datePart !== 'N/A') {
+                        if (sumsByDate[datePart]) {
+                            sumsByDate[datePart] += valeur; // Si la date existe déjà, on ajoute la valeur
+                        } else {
+                            sumsByDate[datePart] = valeur; // Si la date n'existe pas, on crée une nouvelle entrée
+                        }
+                    }
+                });
+
+                let output = "";
+
+                for (const date in sumsByDate) {
+                    output += "<div>Date: " + date + ", Somme des valeurs: " + sumsByDate[date].toFixed(4) + "</div>";
+                }
+
+                resultatDiv.innerHTML = output;
             })
             .catch(error => {
-                resultatDiv.innerHTML = "Erreur serveur.";
+                resultatDiv.innerHTML = "Erreur lors de la récupération des données.";
                 console.error('Erreur:', error);
             });
     }
