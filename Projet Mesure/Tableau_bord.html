@@ -45,7 +45,6 @@
             document.getElementById('calendarIcon').addEventListener('click', function() {
                 pickerRange.show();
             });
-            // Initialisation du graphique avec les 30 derniers jours
             updateChart(moment().subtract(30, 'days'), moment());
             resizeCanvas();
         });
@@ -65,7 +64,7 @@
 <script>
     const ctx = document.getElementById('chartjs-bar').getContext('2d');
     let chart;
-    let allData = {}; // On va stocker toutes les données ici
+    let allData = {}; // On stock les données ici
 
     function updateChart(startDate, endDate) {
         const filteredData = Object.keys(allData)
@@ -98,12 +97,12 @@
                 }]
             },
             options: {
-                plugins: { // Ajoute cette section pour configurer les plugins
+                plugins: { 
                     legend: {
-                        onClick: null, // Empêche le clic sur la légende de cacher les données
+                        onClick: null,
                         labels: {
                             font: {
-                                size: 20 // Augmente la taille de la police (tu peux ajuster cette valeur)
+                                size: 20
                             }
                         }
                     }
@@ -162,15 +161,13 @@
                         }
                     }
                 });
-                allData = sumsByDate; // On stocke les données traitées
-                // Initialise le graphique avec les 30 derniers jours au chargement
+                allData = sumsByDate; // Stocke les données
                 const endDate = moment();
                 const startDate = moment().subtract(30, 'days');
                 updateChart(startDate, endDate);
             })
             .catch(error => {
                 console.error('Erreur lors de la récupération des données:', error);
-                // Tu pourrais afficher un message d'erreur à l'utilisateur ici
             });
     }
 
@@ -179,14 +176,13 @@
         const container = canvas.parentNode;
         canvas.width = container.clientWidth;
         canvas.height = container.clientHeight;
-        // Met à jour le graphique avec les dates actuelles lors du redimensionnement
         if (chart) {
             updateChart(moment().subtract(30, 'days'), moment());
         }
     }
 
     window.addEventListener('resize', resizeCanvas);
-    document.addEventListener('DOMContentLoaded', fetchDataAndInitializeChart); // On appelle la fonction au chargement de la page
+    document.addEventListener('DOMContentLoaded', fetchDataAndInitializeChart);
 </script></div>
         <div class="container_e"><script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
@@ -198,21 +194,31 @@
     document.getElementById('PDF').addEventListener('click', function() {
         exportToPDF();
     });
+    
+    document.getElementById('CSV').addEventListener('click', function() {
+        exportToCSV();
+    });
 
     async function exportToPDF() {
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF('landscape'); //Paysage
         const canvas = document.getElementById('chartjs-bar');
         const imgData = canvas.toDataURL('image/png');
-        const imgWidth = 250; // Largeur de l'image dans le PDF
-        const imgHeight = 150; // Hauteur de l'image dans le PDF
+        const imgWidth = 250;
+        const imgHeight = 150;
         doc.addImage(imgData, 'PNG', 10, 20, imgWidth, imgHeight);
-        // Sauvegarder le PDF
         doc.save('graphique.pdf');
+    }
+    
+    async function exportToCSV() {
+        const { jsCSV } = window.jscsv;
+        const doc = new 
+        
+        doc.save('tableau.csv');
     }
 </script>
 </div>
-        <div class="test"><button onclick="testerConnexion()">Test de connexion et vérification </button>
+        <div class="test"><button onclick="testerConnexion()">Test de connexion et vérification MAMBO </button>
 <div id="resultat"></div>
 
 <script>
@@ -220,20 +226,20 @@
         var resultatDiv = document.getElementById("resultat");
         resultatDiv.innerHTML = "En cour de test...";
 
-        fetch('database.php') // Assure-toi que ton fichier PHP renvoie toujours le 'timestamp' et la 'valeur'
+        fetch('database.php')
             .then(response => response.json())
             .then(data => {
-                const sumsByDate = {}; // On crée un objet vide pour stocker les sommes par date
+                const sumsByDate = {}; 
 
                 data.forEach(item => {
-                    const datePart = item.timestamp ? item.timestamp.substring(0, 10) : 'N/A'; // On prend la date
-                    const valeur = parseFloat(item.valeur); // On convertit la valeur en nombre
+                    const datePart = item.timestamp ? item.timestamp.substring(0, 10) : 'N/A';
+                    const valeur = parseFloat(item.valeur);
 
                     if (datePart !== 'N/A') {
                         if (sumsByDate[datePart]) {
-                            sumsByDate[datePart] += valeur; // Si la date existe déjà, on ajoute la valeur
+                            sumsByDate[datePart] += valeur; 
                         } else {
-                            sumsByDate[datePart] = valeur; // Si la date n'existe pas, on crée une nouvelle entrée
+                            sumsByDate[datePart] = valeur; 
                         }
                     }
                 });
