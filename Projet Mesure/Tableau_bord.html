@@ -43,7 +43,7 @@
                 }
             });
             document.getElementById('calendarIcon').addEventListener('click', function() {
-                pickerRange.show();
+                dateRangePicker.show();
             });
             updateChart(moment().subtract(30, 'days'), moment());
             resizeCanvas();
@@ -64,7 +64,7 @@
 <script>
     const ctx = document.getElementById('chartjs-bar').getContext('2d');
     let chart;
-    let allData = {}; // On stock les données ici
+    let allData = {};
 
     function updateChart(startDate, endDate) {
         const filteredData = Object.keys(allData)
@@ -154,9 +154,12 @@
                     const valeur = parseFloat(item.valeur);
 
                     if (datePart !== 'N/A') {
-                        if (sumsByDate[datePart]) {
+                        if (sumsByDate[datePart]) 
+                        {
                             sumsByDate[datePart] += valeur;
-                        } else {
+                        } 
+                        else 
+                        {
                             sumsByDate[datePart] = valeur;
                         }
                     }
@@ -199,7 +202,7 @@
         exportToCSV();
     });
 
-    async function exportToPDF() {
+    function exportToPDF() {
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF('landscape'); //Paysage
         const canvas = document.getElementById('chartjs-bar');
@@ -210,15 +213,12 @@
         doc.save('graphique.pdf');
     }
     
-    async function exportToCSV() {
-        const { jsCSV } = window.jscsv;
-        const doc = new 
-        
-        doc.save('tableau.csv');
+    function exportToCSV() {
+        window.location.href = 'export-csv.php';
     }
 </script>
 </div>
-        <div class="test"><button onclick="testerConnexion()">Test de connexion et vérification MAMBO </button>
+        <div class="test"><button onclick="testerConnexion()">Test de connexion et vérification </button>
 <div id="resultat"></div>
 
 <script>
