@@ -24,30 +24,29 @@
 
 <div class="date-input-container">
     <input type="text" id="dateRangePicker">
-    <img src="assets/img/calender.webp" alt="Calendar Icon" id="calendarIcon">
+    <img src="assets/img/calender.webp" alt="Calendar Icon" id="calendarIcon" style="cursor: pointer;">
 </div>
 
 <script>
-            $(function(){
-            moment.locale('fr');
-            let dateRangePicker = document.getElementById('dateRangePicker');
-            let pickerRange = new Lightpick({
-                field: dateRangePicker,
-                singleDate: false,
-                onSelect: function(start, end){
-                    let str = '';
-                    str += start ? start.format('DD/MM/YYYY') + ' - ' : '';
-                    str += end ? end.format('DD/MM/YYYY') : '...';
-                    dateRangePicker.value = str;
-                    updateChart(start, end);
-                }
-            });
-            document.getElementById('calendarIcon').addEventListener('click', function() {
-                dateRangePicker.show();
-            });
-            updateChart(moment().subtract(30, 'days'), moment());
-            resizeCanvas();
+    $(function(){
+        moment.locale('fr');
+        let dateRangePicker = document.getElementById('dateRangePicker');
+        let pickerRange = new Lightpick({
+            field: dateRangePicker,
+            singleDate: false,
+            onSelect: function(start, end){
+                let str = '';
+                str += start ? start.format('DD/MM/YYYY') + ' - ' : '';
+                str += end ? end.format('DD/MM/YYYY') : '...';
+                dateRangePicker.value = str;
+            }
         });
+            document.getElementById('calendarIcon').addEventListener('click', function(event) {
+                event.stopPropagation();
+                pickerRange.show();
+                //console.log("Test OK");
+        });
+    });
 </script></div>
                 </div>
             </div>
@@ -207,8 +206,6 @@
         const doc = new jsPDF('landscape'); //Paysage
         const canvas = document.getElementById('chartjs-bar');
         const imgData = canvas.toDataURL('image/png');
-        const imgWidth = 250;
-        const imgHeight = 150;
         doc.addImage(imgData, 'PNG', 10, 20, imgWidth, imgHeight);
         doc.save('graphique.pdf');
     }
