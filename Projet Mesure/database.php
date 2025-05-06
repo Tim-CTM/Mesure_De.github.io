@@ -1,6 +1,6 @@
 <?php
 
-$servername = "192.168.17.10";
+$servername = "127.0.0.1";
 $username = "root";
 $password = "lamp";
 $dbname = "Mesure_De";
@@ -19,7 +19,7 @@ $result = $conn->query($sql);
 $data = array();
 
 if ($result->num_rows > 0) {
-    while ($row = $result->fetch_assoc()) 
+    while ($row = $result->fetch_assoc())  //Tant qu'il y à des info on récupère les colonnes de la BDD
     {
         $data[] = array(
             "timestamp" => $row["Timestamp"],

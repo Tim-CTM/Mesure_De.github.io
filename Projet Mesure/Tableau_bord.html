@@ -39,6 +39,7 @@
                 str += start ? start.format('DD/MM/YYYY') + ' - ' : '';
                 str += end ? end.format('DD/MM/YYYY') : '...';
                 dateRangePicker.value = str;
+                updateChart(start, end);
             }
         });
             document.getElementById('calendarIcon').addEventListener('click', function(event) {
@@ -58,10 +59,10 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-<canvas id="chartjs-bar" width="180" height="60"></canvas>
+<canvas id="graphique" width="180" height="60"></canvas>
 
 <script>
-    const ctx = document.getElementById('chartjs-bar').getContext('2d');
+    const ctx = document.getElementById('graphique').getContext('2d');
     let chart;
     let allData = {};
 
@@ -96,7 +97,7 @@
                 }]
             },
             options: {
-                plugins: { 
+                plugins: {
                     legend: {
                         onClick: null,
                         labels: {
@@ -143,27 +144,27 @@
         });
     }
 
-    function fetchDataAndInitializeChart() {
+    function RecupInfo() {
         fetch('database.php')
             .then(response => response.json())
             .then(data => {
-                const sumsByDate = {};
+                const SommeDate = {};
                 data.forEach(item => {
                     const datePart = item.timestamp ? item.timestamp.substring(0, 10) : 'N/A';
                     const valeur = parseFloat(item.valeur);
 
                     if (datePart !== 'N/A') {
-                        if (sumsByDate[datePart]) 
+                        if (SommeDate[datePart])
                         {
-                            sumsByDate[datePart] += valeur;
-                        } 
-                        else 
+                            SommeDate[datePart] += valeur;
+                        }
+                        else
                         {
-                            sumsByDate[datePart] = valeur;
+                            SommeDate[datePart] = valeur;
                         }
                     }
                 });
-                allData = sumsByDate; // Stocke les données
+                allData = SommeDate; // Stocke les données
                 const endDate = moment();
                 const startDate = moment().subtract(30, 'days');
                 updateChart(startDate, endDate);
@@ -174,7 +175,7 @@
     }
 
     function resizeCanvas() {
-        const canvas = document.getElementById('chartjs-bar');
+        const canvas = document.getElementById('graphique');
         const container = canvas.parentNode;
         canvas.width = container.clientWidth;
         canvas.height = container.clientHeight;
@@ -184,7 +185,7 @@
     }
 
     window.addEventListener('resize', resizeCanvas);
-    document.addEventListener('DOMContentLoaded', fetchDataAndInitializeChart);
+    document.addEventListener('DOMContentLoaded', RecupInfo);
 </script></div>
         <div class="container_e"><script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
@@ -196,20 +197,28 @@
     document.getElementById('PDF').addEventListener('click', function() {
         exportToPDF();
     });
-    
+
     document.getElementById('CSV').addEventListener('click', function() {
         exportToCSV();
     });
 
     function exportToPDF() {
         const { jsPDF } = window.jspdf;
-        const doc = new jsPDF('landscape'); //Paysage
-        const canvas = document.getElementById('chartjs-bar');
-        const imgData = canvas.toDataURL('image/png');
-        doc.addImage(imgData, 'PNG', 10, 20, imgWidth, imgHeight);
-        doc.save('graphique.pdf');
+        const doc = new jsPDF('landscape'); // Paysage
+        const canvas = document.getElementById('graphique');
+
+        // Vérifiez canvas
+        if (canvas) {
+            const imgData = canvas.toDataURL('image/png');
+            const imgWidth = 250; // Largeur de l'image dans le PDF
+            const imgHeight = (canvas.height * imgWidth) / canvas.width; // Hauteur proportionnelle
+            doc.addImage(imgData, 'PNG', 10, 20, imgWidth, imgHeight);
+            doc.save('graphique.pdf');
+        } else {
+            console.error('Canvas not found');
+        }
     }
-    
+
     function exportToCSV() {
         window.location.href = 'export-csv.php';
     }
