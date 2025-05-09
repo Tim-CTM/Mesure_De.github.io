@@ -105,7 +105,6 @@
 
 .date-picker {
   display: flex;
-  margin-bottom: 10px;
   justify-content: flex-end;
   margin-right: 150px;
   flex-direction: row;
@@ -118,7 +117,7 @@
 
 .date-picker input {
   border: 1px solid #ccc;
-  border-radius: 20px;
+  border-radius: 12px;
   padding: 5px;
   width: 225px;
   text-align: left;
@@ -155,9 +154,11 @@
 
 .container_e {
   display: flex;
-  flex-direction: row;
-  align-content: center;
+  align-items: center;
+  gap: 20px;
+  padding: 20px;
   justify-content: flex-end;
+  flex-direction: row;
 }
 
 .container_e button {
@@ -174,7 +175,7 @@
 
 .CSV {
   color: white;
-  background-color: forestgreen;
+  background-color: #379a37;
 }
 
 #PDF {
@@ -183,5 +184,40 @@
 
 #CSV {
   border-radius: 10px;
+}
+
+.date-input_1 img {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  width: 20px;
+  height: auto;
+}
+
+.date-input_1 {
+  position: relative;
+  display: inline-block;
+}
+
+.date-input_1 input {
+  padding-right: 30px;
+  border: 1px solid #ccc;
+  border-radius: 12px;
+  padding: 5px;
+  width: 225px;
+  text-align: left;
+}
+
+.date-picker-1 {
+  display: flex;
+  margin-bottom: 15px;
+  flex-direction: row;
+  align-items: center;
+}
+
+.date-picker-1 label {
+  margin-right: 15px;
 }
 
