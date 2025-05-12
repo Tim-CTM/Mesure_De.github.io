@@ -154,11 +154,11 @@
 
 .container_e {
   display: flex;
-  align-items: center;
   gap: 20px;
   padding: 20px;
-  justify-content: flex-end;
   flex-direction: row;
+  align-items: center;
+  justify-content: flex-end;
 }
 
 .container_e button {
@@ -219,5 +219,18 @@
 
 .date-picker-1 label {
   margin-right: 15px;
+}
+
+.container_DateColumn {
+  display: flex;
+  flex-direction: column;
+}
+
+div {
+}
+
+.Aperçu_graph {
+  background-color: white;
+  font-size: 15px;
 }
 

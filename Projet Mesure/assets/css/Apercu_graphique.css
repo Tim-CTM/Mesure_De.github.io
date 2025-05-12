@@ -1,0 +1,59 @@
+.Backpage {
+  background-color: white;
+  text-align: center;
+  width: 192px;
+  border-radius: 0.5rem;
+  height: 56px;
+  position: relative;
+  color: black;
+  font-size: 1rem;
+  font-weight: 600;
+  border: 4px solid white;
+  overflow: hidden;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding-left: 1rem;
+  transition: all 0.3s ease-in-out;
+}
+
+.icon-wrapper {
+  background-color: rgb(110, 187, 148);
+  height: 48px;
+  width: 48px;
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 10;
+  display: grid;
+  place-items: center;
+  transition: width 0.3s ease-in-out;
+  margin-right: 0.5rem;
+}
+
+.Backpage:hover .icon-wrapper {
+  width: 100%;
+  margin-right: 0;
+}
+
+.button-text {
+  position: relative;
+  transition: transform 0.3s ease-in-out;
+}
+
+.Backpage:hover .button-text {
+  transform: translateX(0);
+}
+
+.icon-wrapper svg {
+  fill: black;
+  width: 25px;
+  height: 25px;
+}
+
+.Backpage:hover {
+  justify-content: center;
+}
+

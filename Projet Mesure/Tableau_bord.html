@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
     <title>Mesure_De</title>
     <link rel="stylesheet" href="assets/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="assets/css/Apercu_graphique.css">
     <link rel="stylesheet" href="assets/css/Main_login.css">
     <link rel="stylesheet" href="assets/css/Tableau_bord.css">
 </head>
@@ -64,7 +65,7 @@
 <script>
     const ctx = document.getElementById('graphique').getContext('2d');
     let chart;
-    let allData = {};
+    let allData = {}; //Toute les information de la BDD sont ici 
 
     function updateChart(startDate, endDate) {
         const filteredData = Object.keys(allData)
@@ -144,36 +145,21 @@
         });
     }
 
-    function RecupInfo() {
-        fetch('database.php')
-            .then(response => response.json())
-            .then(data => {
-                const SommeDate = {};
-                data.forEach(item => {
-                    const datePart = item.timestamp ? item.timestamp.substring(0, 10) : 'N/A';
-                    const valeur = parseFloat(item.valeur);
-
-                    if (datePart !== 'N/A') {
-                        if (SommeDate[datePart])
-                        {
-                            SommeDate[datePart] += valeur;
-                        }
-                        else
-                        {
-                            SommeDate[datePart] = valeur;
-                        }
-                    }
-                });
-                allData = SommeDate; // Stocke les données
-                const endDate = moment();
-                const startDate = moment().subtract(30, 'days');
-                updateChart(startDate, endDate);
-            })
-            .catch(error => {
-                console.error('Erreur lors de la récupération des données:', error);
-            });
-    }
-
+function RecupererInformation() {
+    fetch('database.php')
+        .then(reponse => reponse.json())
+        .then(data => {
+            allData = data; // Stocke les données
+            const endDate = moment();
+            const startDate = moment().subtract(30, 'days');
+            updateChart(startDate, endDate);
+        })
+        .catch(error => {
+            console.error('Erreur lors de la récupération des données:', error);
+        });
+}
+    
+    //Taille du graphique
     function resizeCanvas() {
         const canvas = document.getElementById('graphique');
         const container = canvas.parentNode;
@@ -185,9 +171,10 @@
     }
 
     window.addEventListener('resize', resizeCanvas);
-    document.addEventListener('DOMContentLoaded', RecupInfo);
+    document.addEventListener('DOMContentLoaded', RecupererInformation);
 </script></div>
-        <div class="container_e"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightpick@1.3.4/css/lightpick.min.css">
+        <div class="container_e">
+            <div class="container_DateColumn"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightpick@1.3.4/css/lightpick.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/lightpick@1.3.4/lightpick.min.js"></script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -206,85 +193,61 @@
         <input type="text" id="dateRangePicker2">
         <img src="assets/img/calender.webp" alt="Calendar Icon" id="calendarIcon2" style="cursor: pointer;">
     </div>
-</div><script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
-
-<div>
-    <button class='PDF' id="PDF">PDF</button>
-    <button class='CSV' id="CSV">CSV</button>
 </div>
 
 <script>
-    //Exportation 
-    document.getElementById('PDF').addEventListener('click', function() {
-        exportToPDF();
+    $(function(){
+        moment.locale('fr');
+
+        // Premier date picker
+        let dateRangePicker1 = document.getElementById('dateRangePicker1');
+        let pickerRange1 = new Lightpick({
+            field: dateRangePicker1,
+            singleDate: false,
+            onSelect: function(start, end){
+                let str = '';
+                str += start ? start.format('DD/MM/YYYY') + ' - ' : '';
+                str += end ? end.format('DD/MM/YYYY') : '...';
+                dateRangePicker1.value = str;
+            }
+        });
+        //Quand je click sur l'icon j'affiche le calendrier
+        document.getElementById('calendarIcon1').addEventListener('click', function(event) {
+            event.stopPropagation();
+            pickerRange1.show();
+        });
+
+        //Deuxième date picker
+        let dateRangePicker2 = document.getElementById('dateRangePicker2');
+        let pickerRange2 = new Lightpick({
+            field: dateRangePicker2,
+            singleDate: false,
+            onSelect: function(start, end){
+                let str = '';
+                str += start ? start.format('DD/MM/YYYY') + ' - ' : '';
+                str += end ? end.format('DD/MM/YYYY') : '...';
+                dateRangePicker2.value = str;
+            }
+        });
+
+        document.getElementById('calendarIcon2').addEventListener('click', function(event) {
+            event.stopPropagation();
+            pickerRange2.show();
+        });
     });
-
-    document.getElementById('CSV').addEventListener('click', function() {
-        exportToCSV();
-    });
-
-    function exportToPDF() {
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF('landscape'); // Paysage
-        const canvas = document.getElementById('graphique');
-
-        // Vérifiez canvas
-        if (canvas) {
-            const imgData = canvas.toDataURL('image/png');
-            const imgWidth = 250; // Largeur de l'image dans le PDF
-            const imgHeight = (canvas.height * imgWidth) / canvas.width; // Hauteur proportionnelle
-            doc.addImage(imgData, 'PNG', 10, 20, imgWidth, imgHeight);
-            doc.save('graphique.pdf');
-        } else {
-            console.error('Canvas not found');
-        }
-    }
-    function exportToCSV() {
-        window.location.href = 'export-csv.php';
-    }
-</script>
-</div>
-        <div class="test"><button onclick="testerConnexion()">Test de connexion et vérification </button>
-<div id="resultat"></div>
-
-<script>
-    function testerConnexion() {
-        var resultatDiv = document.getElementById("resultat");
-        resultatDiv.innerHTML = "En cour de test...";
-
-        fetch('database.php')
-            .then(response => response.json())
-            .then(data => {
-                const sumsByDate = {}; 
-
-                data.forEach(item => {
-                    const datePart = item.timestamp ? item.timestamp.substring(0, 10) : 'N/A';
-                    const valeur = parseFloat(item.valeur);
-
-                    if (datePart !== 'N/A') {
-                        if (sumsByDate[datePart]) {
-                            sumsByDate[datePart] += valeur; 
-                        } else {
-                            sumsByDate[datePart] = valeur; 
-                        }
-                    }
-                });
-
-                let output = "";
-
-                for (const date in sumsByDate) {
-                    output += "<div>Date: " + date + ", Somme des valeurs: " + sumsByDate[date].toFixed(4) + "</div>";
-                }
-
-                resultatDiv.innerHTML = output;
-            })
-            .catch(error => {
-                resultatDiv.innerHTML = "Erreur lors de la récupération des données.";
-                console.error('Erreur:', error);
-            });
-    }
 </script></div>
+<div>
+    <button class='Aperçu_graph' id="Aperçu_graph">Aperçu du graphique</button>
+</div>
+
+<script>
+    document.getElementById("Aperçu_graph").addEventListener("click", function() 
+    {
+        window.location.href = "Apercu_graphique.html";
+    });
+</script>
+
+        </div>
     </div>
     <script src="assets/bootstrap/js/bootstrap.min.js"></script>
 </body>

@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html data-bs-theme="light" lang="fr">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>Mesure_De</title>
+    <link rel="stylesheet" href="assets/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="assets/css/Apercu_graphique.css">
+    <link rel="stylesheet" href="assets/css/Main_login.css">
+    <link rel="stylesheet" href="assets/css/Tableau_bord.css">
+</head>
+
+<body>
+    <div class="container_h"><img src="assets/img/equans-smi.svg" width="230" height="110"></div>
+    <div class="element">
+        <div class="icon"></div><div>
+    <button class='Backpage' id="Backpage">
+        <div class="icon-wrapper">
+            <svg width="25px" height="25px" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+                <path fill="#000000" d="M224 480h640a32 32 0 1 1 0 64H224a32 32 0 0 1 0-64z"></path>
+                <path fill="#000000" d="m237.248 512 265.408 265.344a32 32 0 0 1-45.312 45.312l-288-288a32 32 0 0 1 0-45.312l288-288a32 32 0 1 1 45.312 45.312L237.248 512z"></path>
+            </svg>
+        </div>
+        <p class="button-text"></p>
+    </button>
+</div>
+
+<script>
+    document.getElementById("Backpage").addEventListener("click", function() {
+        window.location.href = "Tableau_bord.html";
+    });
+</script>
+    </div>
+    <div class="container_g"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightpick@1.3.4/css/lightpick.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lightpick@1.3.4/lightpick.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<canvas id="graphique" width="180" height="60"></canvas>
+
+<script>
+    const ctx = document.getElementById('').getContext('2d');
+    let chart;
+    let allData = {}; //Toute les information de la BDD sont ici 
+
+    function updateChart(startDate, endDate) {
+        const filteredData = Object.keys(allData)
+            .filter(date => moment(date).isBetween(startDate, endDate, undefined, '[]'))
+            .reduce((obj, key) => {
+                obj[key] = allData[key];
+                return obj;
+            }, {});
+
+        const labels = Object.keys(filteredData);
+        const values = labels.map(date => filteredData[date]);
+
+        if (chart) {
+            chart.destroy();
+        }
+
+        chart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Consommation en kWh',
+                    backgroundColor: 'rgba(0, 120, 215, 0.2)',
+                    borderColor: 'rgba(0, 120, 215, 1)',
+                    hoverBackgroundColor: 'rgba(0, 120, 215, 0.4)',
+                    hoverBorderColor: 'rgba(0, 120, 215, 1)',
+                    data: values,
+                    barPercentage: 1,
+                    categoryPercentage: 0.4
+                }]
+            },
+            options: {
+                plugins: {
+                    legend: {
+                        onClick: null,
+                        labels: {
+                            font: {
+                                size: 20
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        grid: {
+                            display: false
+                        },
+                        stacked: false,
+                        title: {
+                            display: true,
+                            text: 'kWh',
+                            font: {
+                                size: 20
+                            }
+                        },
+                        ticks:{
+                            font:{
+                                size: 20
+                            }
+                        }
+                    },
+                    x: {
+                        stacked: false,
+                        grid: {
+                            color: "transparent"
+                        },
+                        ticks:{
+                            maxRotation: 90,
+                            minRotation: 90,
+                            font:{
+                                size: 20
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    function RecupererInformation() {
+        fetch('database.php')
+            .then(reponse => reponse.json())
+            .then(data => {
+                const SommeDate = {};
+                data.forEach(item => {
+                    const datePart = item.timestamp ? item.timestamp.substring(0, 10) : 'N/A'; //Les 10 première lettre ou chiffre ou caractère
+                    const valeur = parseFloat(item.valeur);
+                    //Addition pour obtenir la somme sinon
+                    if (datePart !== 'N/A') {
+                        if (SommeDate[datePart])
+                        {
+                            SommeDate[datePart] += valeur;
+                        }
+                        else
+                        {
+                            SommeDate[datePart] = valeur;
+                        }
+                    }
+                });
+                allData = SommeDate; // Stocke les données
+                const endDate = moment();
+                const startDate = moment().subtract(30, 'days');
+                updateChart(startDate, endDate);
+            })
+            .catch(error => {
+                console.error('Erreur lors de la récupération des données:', error);
+            });
+    }
+    //Taille du graphique
+    function resizeCanvas() {
+        const canvas = document.getElementById('graphique');
+        const container = canvas.parentNode;
+        canvas.width = container.clientWidth;
+        canvas.height = container.clientHeight;
+        if (chart) {
+            updateChart(moment().subtract(30, 'days'), moment());
+        }
+    }
+
+    window.addEventListener('resize', resizeCanvas);
+    document.addEventListener('DOMContentLoaded', RecupererInformation);
+</script></div>
+    <div class="container_e"><script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+
+<div>
+    <button class='PDF' id="PDF">PDF</button>
+    <button class='CSV' id="CSV">CSV</button>
+</div>
+
+<script>
+    //Exportation 
+    document.getElementById('PDF').addEventListener('click', function() {
+        exportToPDF();
+    });
+
+    document.getElementById('CSV').addEventListener('click', function() {
+        exportToCSV();
+    });
+
+    function exportToPDF() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF('landscape'); // Paysage
+        const canvas = document.getElementById('graphique');
+
+        // Vérifiez canvas
+        if (canvas) {
+            const imgData = canvas.toDataURL('image/png');
+            const imgWidth = 250; // Largeur de l'image dans le PDF
+            const imgHeight = (canvas.height * imgWidth) / canvas.width; // Hauteur proportionnelle
+            doc.addImage(imgData, 'PNG', 10, 20, imgWidth, imgHeight);
+            doc.save('graphique.pdf');
+        } else {
+            console.error('Canvas not found');
+        }
+    }
+    
+    function exportToCSV() {
+        window.location.href = 'export-csv.php';        
+    }
+
+</script>
+</div>
+    <script src="assets/bootstrap/js/bootstrap.min.js"></script>
+</body>
+
+</html>
