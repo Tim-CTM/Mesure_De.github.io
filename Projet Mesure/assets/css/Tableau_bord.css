@@ -154,36 +154,18 @@
 
 .container_e {
   display: flex;
-  gap: 20px;
   padding: 20px;
-  flex-direction: row;
-  align-items: center;
-  justify-content: flex-end;
+  flex-direction: row-reverse;
 }
 
 .container_e button {
-  width: 100px;
-  height: auto;
-  padding: 10px;
-  margin-right: 20px;
-}
-
-.PDF {
+  width: 200px;
+  height: 80px;
+  margin-right: 12px;
+  border-radius: 14px;
+  background-color: #6ebb94;
   color: white;
-  background-color: red;
-}
-
-.CSV {
-  color: white;
-  background-color: #379a37;
-}
-
-#PDF {
-  border-radius: 10px;
-}
-
-#CSV {
-  border-radius: 10px;
+  border: none;
 }
 
 .date-input_1 img {
@@ -226,11 +208,20 @@
   flex-direction: column;
 }
 
-div {
+.checkgraph {
+  display: flex;
+  flex-direction: row-reverse;
 }
 
-.Aperçu_graph {
-  background-color: white;
-  font-size: 15px;
+.chart-container {
+  position: relative;
+  width: 100%;
+  height: 400px;
+  margin-bottom: 20px;
+}
+
+.chart-container canvas {
+  width: 100% !important;
+  height: 100% !important;
 }
 

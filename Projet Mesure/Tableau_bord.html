@@ -60,12 +60,14 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-<canvas id="graphique" width="180" height="60"></canvas>
+<div class="chart-container">
+    <canvas id="graphique"></canvas>
+</div>
 
 <script>
     const ctx = document.getElementById('graphique').getContext('2d');
-    let chart;
-    let allData = {}; // Toute les information de la BDD sont ici
+    let chart; // Déclarez la variable 'chart' ici
+    let allData = {}; // Toutes les informations de la BDD sont ici
 
     function updateChart(startDate, endDate) {
         // Filtrer les données en fonction des dates de début et de fin
@@ -79,129 +81,115 @@
         const labels = Object.keys(filteredData);
         const values = labels.map(date => filteredData[date]);
 
+        // Si le graphique existe déjà, mettez simplement à jour ses données
         if (chart) {
-            chart.destroy();
-        }
+            chart.data.labels = labels;
+            chart.data.datasets[0].data = values;
+            chart.update(); // Mettez à jour le graphique
+        } else {
+            // Sinon, créez le graphique pour la première fois
+            chart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Consommation en kWh',
+                        backgroundColor: 'rgba(0, 120, 215, 0.4)',
+                        borderColor: 'rgba(0, 120, 215, 1)',
+                        hoverBackgroundColor: 'rgba(0, 120, 215, 0.6)',
+                        hoverBorderColor: 'rgba(0, 120, 215, 1)',
+                        data: values,
+                        barPercentage: 0.75,
+                        categoryPercentage: 0.5
+                    }]
+                },
+                options: {
+                    //Options essentielles pour le redimensionnement automatique
+                    responsive: true,
+                    maintainAspectRatio: false, // Ne pas maintenir le rapport hauteur et largeur
 
-        chart = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: 'Consommation en kWh',
-                    backgroundColor: 'rgba(0, 120, 215, 0.4)',
-                    borderColor: 'rgba(0, 120, 215, 1)',
-                    hoverBackgroundColor: 'rgba(0, 120, 215, 0.6)',
-                    hoverBorderColor: 'rgba(0, 120, 215, 1)',
-                    data: values,
-                    barPercentage: 0.75,
-                    categoryPercentage: 0.5
-                }]
-            },
-            options: {
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        title: {
-                            display: true,
-                            text: 'kWh'
+                    plugins: {
+                        legend: {
+                            onClick: null
                         }
                     },
-                    x: {
-                        grid: {
-                            color: "transparent"
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'kWh'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                color: "transparent"
+                            }
                         }
-                    }
-                }
-            }
-        });
-    }
-
-function getDataAndUpdateChart() {
-    // Démarre la récupération des données depuis 'database.php'
-    fetch('database.php')
-        // Lorsque la réponse est reçue, elle est analysée au format JSON
-        .then(response => response.json())
-        .then(data => {
-            // Initialise un objet pour stocker la somme des valeurs par date
-            const SommeDate = {};
-            // Parcourt chaque élément des données récupérées
-            data.forEach(item => {
-                // Extrait la partie de la date (les 10 premiers caractères) du timestamp, ou 'N/A' si le timestamp est absent
-                const datePart = item.timestamp ? item.timestamp.substring(0, 10) : 'N/A';
-                // Convertit la valeur en nombre à virgule flottante
-                const valeur = parseFloat(item.valeur);
-
-                // Vérifie si une partie de date valide a été extraite
-                if (datePart !== 'N/A') {
-                    // Si la date existe déjà dans SommeDate, ajoute la valeur correspondante
-                    if (SommeDate[datePart]) {
-                        SommeDate[datePart] += valeur;
-                    } else {
-                        // Si la date est nouvelle, crée une nouvelle entrée avec la valeur
-                        SommeDate[datePart] = valeur;
                     }
                 }
             });
-            // Stocke les données agrégées dans la variable globale allData
-            allData = SommeDate; // Stocke les données
-
-            // Récupère les paramètres de l'URL
-            const urlParams = new URLSearchParams(window.location.search);
-            // Récupère la valeur du paramètre 'date'
-            const dateParam = urlParams.get('date');
-
-            // Vérifie si le paramètre 'date' existe dans l'URL
-            if (dateParam) {
-                // Sépare la chaîne de dates en date de début et date de fin
-                const [start, end] = dateParam.split(' - ');
-                // Crée un objet Moment.js pour la date de début
-                const startDate = moment(start, 'DD/MM/YYYY');
-                // Crée un objet Moment.js pour la date de fin
-                const endDate = moment(end, 'DD/MM/YYYY');
-                // Appelle la fonction pour mettre à jour le graphique avec les dates récupérées
-                updateChart(startDate, endDate); // Appelle la fonction pour mettre à jour le graphique
-            } else {
-                // Si le paramètre 'date' n'est pas présent, affiche toutes les données par défaut
-                const endDate = moment(); // Date d'aujourd'hui
-                const startDate = moment(0); // Début de l'époque Unix (1er janvier 1970)
-                // Appelle la fonction pour mettre à jour le graphique avec la plage de dates par défaut
-                updateChart(startDate, endDate); // Appelle la fonction pour mettre à jour le graphique
-            }
-        })
-        // Gère les erreurs qui surviennent lors de la récupération des données
-        .catch(error => {
-            console.error('Erreur lors de la récupération des données', error);
-        });
-}
-
-    //Taille du graphique
-    function resizeCanvas() {
-        const canvas = document.getElementById('graphique');
-        const container = canvas.parentNode;
-        canvas.width = container.clientWidth;
-        canvas.height = container.clientHeight;
-        if (chart) {
-            const urlParams = new URLSearchParams(window.location.search);
-            const dateParam = urlParams.get('date');
-
-            if (dateParam) {
-                const [start, end] = dateParam.split(' - ');
-                const startDate = moment(start, 'DD/MM/YYYY');
-                const endDate = moment(end, 'DD/MM/YYYY');
-                updateChart(startDate, endDate);
-            } else {
-                const endDate = moment();
-                const startDate = moment().subtract(30, 'days');
-                updateChart(startDate, endDate);
-            }
         }
     }
 
-    window.addEventListener('resize', resizeCanvas);
-    document.addEventListener('DOMContentLoaded',getDataAndUpdateChart );
-</script>
-</div>
+    function getDataAndUpdateChart() {
+        // On récupère les données depuis 'database.php'
+        fetch('database.php')
+            // Lorsque la réponse est reçue, elle est analysée au format JSON
+            .then(response => {
+                if (!response.ok) { // Vérifie si la réponse HTTP est OK (statut 200)
+                    throw new Error(`Erreur HTTP: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                // On stocke la somme des valeurs par date
+                const SommeDate = {};
+                // Parcourt chaque élément des données récupérées
+                data.forEach(item => {
+                    const datePart = item.timestamp ? item.timestamp.substring(0, 10) : 'N/A';
+                    const valeur = parseFloat(item.valeur);
+
+                    if (datePart !== 'N/A' && !isNaN(valeur)) { // Ajout de vérification isNaN
+                        if (SommeDate[datePart]) {
+                            SommeDate[datePart] += valeur;
+                        } else {
+                            SommeDate[datePart] = valeur;
+                        }
+                    }
+                });
+                allData = SommeDate; // Stocke les données agrégées
+
+                // Récupère les paramètres de l'URL
+                const urlParams = new URLSearchParams(window.location.search);
+                const dateParam = urlParams.get('date');
+
+                if (dateParam) {
+                    const [start, end] = dateParam.split(' - ');
+                    const startDate = moment(start, 'DD/MM/YYYY');
+                    const endDate = moment(end, 'DD/MM/YYYY');
+                    updateChart(startDate, endDate);
+                } else {
+                    // Si le paramètre 'date' n'est pas présent, affiche toutes les données par défaut
+                    const endDate = moment();
+                    // Une date très lointaine pour inclure toutes les données si aucune plage n'est spécifiée
+                    const startDate = moment('1970-01-01');
+                    updateChart(startDate, endDate);
+                }
+            })
+            .catch(error => {
+                console.error('Erreur lors de la récupération ou du traitement des données:', error);
+                // Si une erreur se produit (ex: database.php ne renvoie rien),
+                // Initialiser le graphique même avec des données vides pour qu'il s'affiche.
+                if (!chart) {
+                    updateChart(moment(), moment()); // Initialise un graphique vide
+                }
+            });
+    }
+
+    // Lancement de la récupération des données et de l'affichage du graphique au chargement de la page
+    document.addEventListener('DOMContentLoaded', getDataAndUpdateChart);
+</script></div>
         <div class="container_e">
             <div class="container_DateColumn"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightpick@1.3.4/css/lightpick.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
@@ -224,7 +212,7 @@ function getDataAndUpdateChart() {
     </div>
 </div>
 
-<div>
+<div class="checkgraph">
     <button class='Aperçu_graph' id="Aperçu_graph">Aperçu du graphique</button>
 </div>
 

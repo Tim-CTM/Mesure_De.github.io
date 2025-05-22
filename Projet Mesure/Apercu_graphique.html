@@ -39,20 +39,20 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-<div>
-    <canvas id="graphiqueAvant" width="180" height="60"></canvas>
+<div class="chart-container1">
+    <canvas id="chartbefore"></canvas>
 </div>
 
-<div>
-    <canvas id="graphiqueApres" width="180" height="60"></canvas>
+<div class="chart-container1">
+    <canvas id="chartafter"></canvas>
 </div>
 
 <script>
-    const ctxAvant = document.getElementById('graphiqueAvant').getContext('2d');
-    const ctxApres = document.getElementById('graphiqueApres').getContext('2d');
-    let chartAvant;
-    let chartApres;
-    let allData = {}; // Toute les information de la BDD sont ici
+    const ctxBefore = document.getElementById('chartbefore').getContext('2d');
+    const ctxAfter = document.getElementById('chartafter').getContext('2d');
+    let chartbefore;
+    let chartafter;
+    let allData = {}; // Toutes les informations de la BDD sont ici
 
     function updateChart(ctx, chartInstance, startDate, endDate, label) {
         // Filtrer les données en fonction des dates de début et de fin
@@ -66,203 +66,160 @@
         const labels = Object.keys(filteredData);
         const values = labels.map(date => filteredData[date]);
 
+        // Si le graphique existe déjà, mettez simplement à jour ses données
+        // et ne le recréez pas, sauf vraiment utile
         if (chartInstance) {
-            chartInstance.destroy();
-        }
+            chartInstance.data.labels = labels;
+            chartInstance.data.datasets[0].label = `Consommation en kWh (${label})`;
+            chartInstance.data.datasets[0].data = values;
+            chartInstance.update();
+            return chartInstance; // Retourne l'instance existante
+        } else {
+            // Sinon, créez le graphique pour la première fois
+            return new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: `Consommation en kWh (${label})`,
+                        backgroundColor: 'rgba(0, 120, 215, 0.4)',
+                        borderColor: 'rgba(0, 120, 215, 1)',
+                        hoverBackgroundColor: 'rgba(0, 120, 215, 0.6)',
+                        hoverBorderColor: 'rgba(0, 120, 215, 1)',
+                        data: values,
+                        barPercentage: 0.75,
+                        categoryPercentage: 0.5
+                    }]
+                },
+                options: {
+                    // Options de redimensionnement important
+                    responsive: true,
+                    maintainAspectRatio: false, // Permet au graphique de s'étirer pour remplir le conteneur
 
-        return new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: `Consommation en kWh (${label})`,
-                    backgroundColor: 'rgba(0, 120, 215, 0.4)',
-                    borderColor: 'rgba(0, 120, 215, 1)',
-                    hoverBackgroundColor: 'rgba(0, 120, 215, 0.6)',
-                    hoverBorderColor: 'rgba(0, 120, 215, 1)',
-                    data: values,
-                    barPercentage: 0.75,
-                    categoryPercentage: 0.5
-                }]
-            },
-            options: {
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        title: {
-                            display: true,
-                            text: 'kWh'
+                    plugins: {
+                        legend: {
+                            onClick: null
                         }
                     },
-                    x: {
-                        grid: {
-                            color: "transparent"
+                    scales: {
+                        y: {
+                            beginAtZero: true, //Commence à 0
+                            title: {
+                                display: true,
+                                text: 'kWh'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                color: "transparent"
+                            }
                         }
-                    }
-                }
-            }
-        });
-    }
-
-// Récupérer les données et afficher les graphiques
-function getDataAndUpdateChart() {
-    fetch('database.php')
-        .then(response => response.json())
-        .then(data => {
-            const SommeDate = {};
-            data.forEach(item => {
-                const datePart = item.timestamp ? item.timestamp.substring(0, 10) : 'N/A';
-                const valeur = parseFloat(item.valeur);
-
-                if (datePart !== 'N/A') {
-                    if (SommeDate[datePart]) {
-                        SommeDate[datePart] += valeur;
-                    } else {
-                        SommeDate[datePart] = valeur;
                     }
                 }
             });
-            allData = SommeDate; // Stocke les données
-
-            // Récupérer les dates depuis l'URL
-            const urlParams = new URLSearchParams(window.location.search);
-            const dateAvantParam = urlParams.get('dateAvant');
-            const dateApresParam = urlParams.get('dateApres');
-
-            let dateAvantDebut, dateAvantFin, dateApresDebut, dateApresFin;
-
-            // Vérification et affichage du graphique "Avant-travaux" si une date est présente
-            if (dateAvantParam) {
-                const [startAvant, endAvant] = dateAvantParam.split(' - ');
-                if (startAvant && endAvant) {
-                    dateAvantDebut = moment(startAvant, 'DD/MM/YYYY');
-                    dateAvantFin = moment(endAvant, 'DD/MM/YYYY');
-                    chartAvant = updateChart(ctxAvant, chartAvant, dateAvantDebut, dateAvantFin, 'Avant-travaux');
-                    const canvasAvantElement = document.getElementById('graphiqueAvant');
-                    if (canvasAvantElement) {
-                        canvasAvantElement.style.display = 'block'; // Assurez-vous qu'il est visible
-                    }
-                } else {
-                    if (chartAvant) {
-                        chartAvant.destroy();
-                        chartAvant = null;
-                    } else {
-                        const canvasAvantElement = document.getElementById('graphiqueAvant');
-                        if (canvasAvantElement) {
-                            canvasAvantElement.style.display = 'none';
-                        }
-                    }
-                }
-            } else {
-                if (chartAvant) {
-                    chartAvant.destroy();
-                    chartAvant = null;
-                } else {
-                    const canvasAvantElement = document.getElementById('graphiqueAvant');
-                    if (canvasAvantElement) {
-                        canvasAvantElement.style.display = 'none';
-                    }
-                }
-            }
-
-            // Vérification et affichage du graphique "Après-travaux" si une date est présente
-            if (dateApresParam) {
-                const [startApres, endApres] = dateApresParam.split(' - ');
-                if (startApres && endApres) {
-                    dateApresDebut = moment(startApres, 'DD/MM/YYYY');
-                    dateApresFin = moment(endApres, 'DD/MM/YYYY');
-                    chartApres = updateChart(ctxApres, chartApres, dateApresDebut, dateApresFin, 'Après-travaux');
-                    const canvasApresElement = document.getElementById('graphiqueApres');
-                    if (canvasApresElement) {
-                        canvasApresElement.style.display = 'block'; // Assurez-vous qu'il est visible
-                    }
-                } else {
-                    if (chartApres) {
-                        chartApres.destroy();
-                        chartApres = null;
-                    } else {
-                        const canvasApresElement = document.getElementById('graphiqueApres');
-                        if (canvasApresElement) {
-                            canvasApresElement.style.display = 'none';
-                        }
-                    }
-                }
-            } else {
-                if (chartApres) {
-                    chartApres.destroy();
-                    chartApres = null;
-                } else {
-                    const canvasApresElement = document.getElementById('graphiqueApres');
-                    if (canvasApresElement) {
-                        canvasApresElement.style.display = 'none';
-                    }
-                }
-            }
-
-        })
-        .catch(error => {
-            console.error('Erreur lors de la récupération des données', error);
-        });
-}
-    
-    
-//Taille du graphique
-function resizeCanvas() {
-        const canvasAvant = document.getElementById('graphiqueAvant');
-        const canvasApres = document.getElementById('graphiqueApres');
-        const container = canvasAvant.parentNode; // Utiliser le même parent pour les deux 
-        canvasAvant.width = container.clientWidth;
-        canvasAvant.height = container.clientHeight;
-        canvasApres.width = container.clientWidth;
-        canvasApres.height = container.clientHeight;
-
-        // Met à jour les graphiques après le redimensionnement
-        const urlParams = new URLSearchParams(window.location.search);
-        const dateAvantParam = urlParams.get('dateAvant');
-        const dateApresParam = urlParams.get('dateApres');
-        let dateAvantDebut, dateAvantFin, dateApresDebut, dateApresFin;
-
-        if (dateAvantParam) { // Vérifie si le paramètre de date "Avant" est présent
-            const [startAvant, endAvant] = dateAvantParam.split(' - ');
-            if (startAvant && endAvant) {
-                dateAvantDebut = moment(startAvant, 'DD/MM/YYYY');
-                dateAvantFin = moment(endAvant, 'DD/MM/YYYY');
-                if (chartAvant) {
-                    chartAvant.destroy();
-                    chartAvant = updateChart(ctxAvant, null, dateAvantDebut, dateAvantFin, 'Avant-travaux');
-                }
-            } else if (chartAvant) {
-                chartAvant.destroy();
-                chartAvant = null;
-            }
-        } else if (chartAvant) {
-            chartAvant.destroy();
-            chartAvant = null;
-        }
-
-        if (dateApresParam) { // Vérifie si le paramètre de date "Après" est présent
-            const [startApres, endApres] = dateApresParam.split(' - ');
-            if (startApres && endApres) {
-                dateApresDebut = moment(startApres, 'DD/MM/YYYY');
-                dateApresFin = moment(endApres, 'DD/MM/YYYY');
-                if (chartApres) {
-                    chartApres.destroy();
-                    chartApres = updateChart(ctxApres, null, dateApresDebut, dateApresFin, 'Après-travaux');
-                }
-            } else if (chartApres) {
-                chartApres.destroy();
-                chartApres = null;
-            }
-        } else if (chartApres) {
-            chartApres.destroy();
-            chartApres = null;
         }
     }
 
-    window.addEventListener('resize', resizeCanvas);
-    document.addEventListener('DOMContentLoaded', getDataAndUpdateChart);
+    //Récupérer les données et initialiser/met à jour les graphiques
+    function getDataAndInitCharts() {
+        fetch('database.php')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`Erreur HTTP: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                const SumsDate = {};
+                data.forEach(item => {
+                    const datePart = item.timestamp ? item.timestamp.substring(0, 10) : 'N/A';
+                    const valeur = parseFloat(item.valeur);
+
+                    if (datePart !== 'N/A' && !isNaN(valeur)) {
+                        if (SumsDate[datePart]) {
+                            SumsDate[datePart] += valeur;
+                        } else {
+                            SumsDate[datePart] = valeur;
+                        }
+                    }
+                });
+                allData = SumsDate;
+
+                const urlParams = new URLSearchParams(window.location.search);
+                const dateBeforeParam = urlParams.get('dateAvant'); // Garde le nom du paramètre URL
+                const dateAfterParam = urlParams.get('dateApres');
+
+                // Graphique "Avant"
+                const canvasBeforeElement = document.getElementById('chartbefore');
+                if (dateBeforeParam) {
+                    const [startBefore, endBefore] = dateBeforeParam.split(' - ');
+                    if (startBefore && endBefore) {
+                        const dateBeforeDebut = moment(startBefore, 'DD/MM/YYYY');
+                        const dateBeforeFin = moment(endBefore, 'DD/MM/YYYY');
+                        chartbefore = updateChart(ctxBefore, chartbefore, dateBeforeDebut, dateBeforeFin, 'Avant travaux');
+                        if (canvasBeforeElement) canvasBeforeElement.style.display = 'block';
+                    } else {
+                        if (chartbefore) chartbefore.destroy();
+                        chartbefore = null;
+                        if (canvasBeforeElement) canvasBeforeElement.style.display = 'none';
+                    }
+                } else {
+                    if (chartbefore) chartbefore.destroy();
+                    chartbefore = null;
+                    if (canvasBeforeElement) canvasBeforeElement.style.display = 'none';
+                }
+
+                // Graphique "Après"
+                const canvasAfterElement = document.getElementById('chartafter');
+                if (dateAfterParam) {
+                    const [startAfter, endAfter] = dateAfterParam.split(' - ');
+                    if (startAfter && endAfter) {
+                        const dateAfterDebut = moment(startAfter, 'DD/MM/YYYY');
+                        const dateAfterFin = moment(endAfter, 'DD/MM/YYYY');
+                        chartafter = updateChart(ctxAfter, chartafter, dateAfterDebut, dateAfterFin, 'Après travaux');
+                        if (canvasAfterElement) canvasAfterElement.style.display = 'block';
+                    } else {
+                        if (chartafter) chartafter.destroy();
+                        chartafter = null;
+                        if (canvasAfterElement) canvasAfterElement.style.display = 'none';
+                    }
+                } else {
+                    if (chartafter) chartafter.destroy();
+                    chartafter = null;
+                    if (canvasAfterElement) canvasAfterElement.style.display = 'none';
+                }
+            })
+            .catch(error => {
+                console.error('Erreur lors de la récupération des données:', error);
+                // Si une erreur se produit, assure que les canvas sont affichés et que les variables de chart sont nulles pour éviter des erreurs futures.
+                if (chartbefore) chartbefore.destroy();
+                chartbefore = null;
+                const canvasBeforeElement = document.getElementById('chartbefore');
+                if (canvasBeforeElement) canvasBeforeElement.style.display = 'none';
+
+                if (chartafter) chartafter.destroy();
+                chartafter = null;
+                const canvasAfterElement = document.getElementById('chartafter');
+                if (canvasAfterElement) canvasAfterElement.style.display = 'none';
+            });
+    }
+
+    // Redimensionnement de la fenêtre
+    function handleResize() {
+        if (chartbefore) {
+            chartbefore.resize(); //Redimensionne le graphique avant travaux
+        }
+        if (chartafter) {
+            chartafter.resize();
+        }
+        getDataAndInitCharts();
+    }
+
+    // Écouteur d'événements
+    window.addEventListener('resize', handleResize);
+    document.addEventListener('DOMContentLoaded', getDataAndInitCharts);
 </script></div>
-    <div class="container_e"><script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+    <div class="container_export"><script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
 
 <div>
@@ -283,8 +240,8 @@ function resizeCanvas() {
     function exportToPDF() {
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF('landscape'); // Paysage
-        const canvasAvant = document.getElementById('graphiqueAvant');
-        const canvasApres = document.getElementById('graphiqueApres');
+        const canvasAvant = document.getElementById('chartbefore');
+        const canvasApres = document.getElementById('chartafter');
         let yPosition = 20; // Position verticale initiale pour le premier graphique
         const margin = 10;
         const imgWidth = 250; // Largeur de l'image dans le PDF
@@ -296,7 +253,7 @@ function resizeCanvas() {
             doc.addImage(imgDataAvant, 'PNG', margin, yPosition, imgWidth, imgHeightAvant);
             yPosition += imgHeightAvant + margin; // Augmenter la position pour le graphique suivant
         } else {
-            console.log('Canvas "graphiqueAvant" non trouvé ou caché.');
+            console.log('Canvas "chartbefore" non trouvé ou caché.');
         }
 
         // Vérifiez et ajoutez le deuxième graphique ("Après-travaux")
@@ -305,7 +262,7 @@ function resizeCanvas() {
             const imgHeightApres = (canvasApres.height * imgWidth) / canvasApres.width;
             doc.addImage(imgDataApres, 'PNG', margin, yPosition, imgWidth, imgHeightApres);
         } else {
-            console.log('Canvas "graphiqueApres" non trouvé ou caché.');
+            console.log('Canvas "chartafter" non trouvé ou caché.');
         }
 
         doc.save('graphiques.pdf');

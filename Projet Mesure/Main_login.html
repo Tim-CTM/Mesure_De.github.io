@@ -15,22 +15,49 @@
     <div class="page">
         <div class="container_h"><img width="230" height="110" src="assets/img/equans-smi.svg"></div>
         <div class="login-background">
-            <div class="login_container">
-                <form id="loginForm">
-                    <div class="form-grp"><label class="form-label">Identifiant</label><input class="form-control black-ligne" type="text" id="identifiant"></div>
-                    <div class="form-grp"><label class="form-label">Mot de passe</label><input class="form-control black-ligne" type="text" id="password"></div>
-                    <div class="form-grp"><a id="oubliemdp" class="url" href="#">Mot de passe oublié ?</a></div><button id="button-login" class="btn btn-primary login-button" type="button">Connexion</button>
+            <div class="login_container"><form id="loginForm" method="post">
+    <div class="form-grp">
+        <label class="form-label" for="idClient">Identifiant</label>
+        <input id="idClient" name="idClient" class="form-control black-ligne" type="text" required />
+    </div>
+    <div class="form-grp">
+        <label class="form-label" for="motDePasse">Mot de passe</label>
+        <input id="motDePasse" name="motDePasse" class="form-control black-ligne" type="password" required />
+    </div>
+    <button id="button-login" class="btn btn-primary login-button" type="submit">Connexion</button>
+</form>
 
 <script>
-    
-    document.getElementById("button-login").addEventListener("click", function() 
-    {
-        window.location.href = "Tableau_bord.html";
-    });
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
+        e.preventDefault(); // Empêche la soumission par défaut du formulaire
 
+        // Récupérer les données du formulaire
+        var idClient = document.getElementById('idClient').value;
+        var motDePasse = document.getElementById('motDePasse').value;
+
+        // Envoi des données via Fetch (POST)
+        fetch('login.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',  // Envoi des données en POST classique
+            },
+            body: 'idClient=' + encodeURIComponent(idClient) + '&motDePasse=' + encodeURIComponent(motDePasse),
+        })
+        .then(response => response.text()) // Traiter la réponse comme texte
+        .then(data => {
+            if (data.includes('✅')) { // Si la réponse contient "✅", la connexion est réussie
+                window.location.href = 'Tableau_bord.html';  // Redirection vers le tableau de bord
+            } else {
+                alert("Identifiant ou mot de passe incorrect");
+            }
+        })
+        .catch(error => {
+            console.error('Erreur:', error);
+            alert("Une erreur est survenue.");
+        });
+    });
 </script>
-                </form>
-            </div>
+</div>
         </div>
     </div>
     <script src="assets/bootstrap/js/bootstrap.min.js"></script>
