@@ -39,16 +39,20 @@
         fetch('login.php', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',  // Envoi des données en POST classique
+                'Content-Type': 'application/x-www-form-urlencoded',
             },
             body: 'idClient=' + encodeURIComponent(idClient) + '&motDePasse=' + encodeURIComponent(motDePasse),
         })
-        .then(response => response.text()) // Traiter la réponse comme texte
+        .then(response => response.json()) // Traiter la réponse comme JSON
         .then(data => {
-            if (data.includes('✅')) { // Si la réponse contient "✅", la connexion est réussie
+            console.log('Réponse du serveur:', data);  // Afficher la réponse dans la console
+
+            if (data.success) {  // Si la réponse indique un succès
+                // Redirection vers le tableau de bord ou une autre page après connexion
                 window.location.href = 'Tableau_bord.html';  // Redirection vers le tableau de bord
             } else {
-                alert("Identifiant ou mot de passe incorrect");
+                // Si le mot de passe est incorrect ou utilisateur non trouvé
+                alert(data.message); // Afficher le message d'erreur retourné par le serveur
             }
         })
         .catch(error => {

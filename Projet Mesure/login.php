@@ -1,83 +1,58 @@
 <?php
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-header('Content-Type: application/json');
-
-// 1. Lecture JSON
-$data = json_decode(file_get_contents('php://input'), true);
-
-if (!isset($data['identifiant'], $data['password'])) {
-    echo json_encode(['success' => false, 'message' => 'Identifiant ou mot de passe manquant.']);
-    exit;
-}
-
-$identifiant = $data['identifiant'];
-$password_clair = $data['password'];
-
-// 2. Connexion à la BDD
 $servername = "192.168.17.10";
-$username_db = "root";
-$password_db_conn = "lamp";
+$username = "root";
+$password_db = "lamp";
 $dbname = "Mesure_De";
 
-$conn = new mysqli($servername, $username_db, $password_db_conn, $dbname);
+// Définir le type de contenu en JSON
+header('Content-Type: application/json');
 
-if ($conn->connect_error) {
-    echo json_encode(['success' => false, 'message' => 'Erreur de connexion à la base de données.']);
+try 
+{
+    // Connexion à la base de données avec PDO
+    $pdo = new PDO("mysql:host=$servername;dbname=$dbname;charset=utf8", $username, $password_db);
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+} catch (PDOException $e) {
+    echo json_encode(["success" => false, "message" => "Erreur de connexion à la base de données : " . $e->getMessage()]);
     exit;
 }
 
-// 3. Requête SQL
-$sql = "SELECT Mot_de_passe, Cle_Chiffrement FROM Client_Web WHERE ID_Client_PK = ?";
-$stmt = $conn->prepare($sql);
-$stmt->bind_param("s", $identifiant);
-$stmt->execute();
-$result = $stmt->get_result();
+// === Traitement du formulaire ===
+if ($_SERVER['REQUEST_METHOD'] === 'POST') 
+{
+    // Récupération des données du formulaire
+    $idClient = $_POST['idClient'] ?? '';
+    $motDePasse = $_POST['motDePasse'] ?? '';
 
-if ($result->num_rows === 0) {
-    echo json_encode(['success' => false, 'message' => 'Identifiant ou mot de passe incorrect.']);
-    exit;
-}
+    // Vérification que les champs sont remplis
+    if (empty($idClient) || empty($motDePasse)) 
+    {
+        echo json_encode(["success" => false, "message" => "Identifiant ou mot de passe manquant."]);
+        exit;
+    }
 
-$row = $result->fetch_assoc();
-$db_password_b64 = $row['Mot_de_passe'];
-$key_hex = $row['Cle_Chiffrement'];
+    // Recherche de l'utilisateur dans la base de données
+    $sql = "SELECT Mot_de_passe FROM Client_Web WHERE ID_Client_PK = :id";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute([':id' => $idClient]);
+    $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-$key = hex2bin($key_hex);
-if ($key === false || strlen($key) !== 16) {
-    echo json_encode(['success' => false, 'message' => 'Clé de chiffrement invalide.']);
-    exit;
-}
+    if ($user) 
+    {
+        // Hachage du mot de passe en clair avec SHA-256
+        $hashedPassword = hash('sha256', $motDePasse);
 
-// 4. Déchiffrement et comparaison
-$password_input_encrypted_b64 = encrypt($password_clair, $key);
-
-$db_password_decrypted = decrypt($db_password_b64, $key);
-$input_password_decrypted = decrypt($password_input_encrypted_b64, $key);
-
-if ($db_password_decrypted !== false && $db_password_decrypted === $input_password_decrypted) {
-    echo json_encode(['success' => true]);
-} else {
-    echo json_encode(['success' => false, 'message' => 'Identifiant ou mot de passe incorrect.']);
-}
-
-$stmt->close();
-$conn->close();
-
-// 🔐 Fonctions AES-128-CBC
-function encrypt($plain, $key) {
-    $iv = 'myiv123456789012'; // IV FIXE (16 octets)
-    if (strlen($key) !== 16) return false;
-    $encrypted = openssl_encrypt($plain, 'AES-128-CBC', $key, OPENSSL_RAW_DATA, $iv);
-    return $encrypted ? base64_encode($encrypted) : false;
-}
-
-function decrypt($encrypted_b64, $key) {
-    $iv = 'myiv123456789012';
-    if (strlen($key) !== 16) return false;
-    $encrypted = base64_decode($encrypted_b64);
-    $decrypted = openssl_decrypt($encrypted, 'AES-128-CBC', $key, OPENSSL_RAW_DATA, $iv);
-    return $decrypted !== false ? $decrypted : false;
+        // Vérification du mot de passe : Comparer les deux hachages SHA-256
+        if ($hashedPassword === $user['Mot_de_passe']) 
+        {
+            // Si le mot de passe est correct
+            echo json_encode(["success" => true, "message" => "Connexion réussie"]);
+        } 
+        else
+        {
+            // Si le mot de passe est incorrect
+            echo json_encode(["success" => false, "message" => "Mot de passe ou utilisateur incorrect."]);
+        }
+    }
 }
 ?>
