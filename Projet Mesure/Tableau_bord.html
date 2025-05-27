@@ -141,20 +141,20 @@
             return response.json();
         })
         .then(data => {
-            const SommeDate = {};
+            const Sumsdate = {};
             data.forEach(item => {
                 const datePart = item.timestamp ? item.timestamp.substring(0, 10) : 'N/A';
                 const valeur = parseFloat(item.valeur);
 
                 if (datePart !== 'N/A' && !isNaN(valeur)) {
-                    if (SommeDate[datePart]) {
-                        SommeDate[datePart] += valeur;
+                    if (Sumsdate[datePart]) {
+                        Sumsdate[datePart] += valeur;
                     } else {
-                        SommeDate[datePart] = valeur;
+                        Sumsdate[datePart] = valeur;
                     }
                 }
             });
-            allData = SommeDate; // Stocke les données agrégées
+            allData = Sumsdate; // Stocke les données agrégées
 
             // Récupère les paramètres de l'URL
             const urlParams = new URLSearchParams(window.location.search);
@@ -275,62 +275,7 @@
     });
 </script>
         </div>
-        <div><div class="test">
-    <button onclick="testerConnexion()">Test de connexion et vérification</button>
-    <div id="resultat"></div>
-</div>
-
-<script>
-function testerConnexion() 
-    {
-    var resultatDiv = document.getElementById("resultat");
-    resultatDiv.innerHTML = "En cours de test...";
-
-    fetch('database.php')
-        .then(response => {
-            if (!response.ok) 
-            {
-                throw new Error(`Erreur HTTP! statut: ${response.status}`);
-            }
-            return response.json();
-        })
-        .then(data => {
-            const sumsByDate = {};
-
-            data.forEach(item => {
-                const datePart = item.timestamp ? item.timestamp.substring(0, 10) : 'N/A';
-                const valeur = parseFloat(item.valeur);
-
-                if (datePart !== 'N/A' && !isNaN(valeur)) 
-                {
-                    sumsByDate[datePart] = (sumsByDate[datePart] || 0) + valeur;
-                } 
-                else if (isNaN(valeur)) 
-                {
-                    console.warn(`Valeur non numérique ignorée pour la date: ${datePart}`);
-                }
-            });
-
-            let output = "";
-            if (Object.keys(sumsByDate).length === 0) 
-            {
-                output = "Aucune donnée trouvée.";
-            }
-            else 
-            {
-                for (const date in sumsByDate) 
-                {
-                    output += `<div>Date: ${date}, Somme des valeurs: ${sumsByDate[date].toFixed(4)}</div>`;
-                }
-            }
-            resultatDiv.innerHTML = output;
-        })
-        .catch(error => {
-            console.error('Erreur lors de la récupération des données:', error);
-            resultatDiv.innerHTML = "Erreur lors du test de connexion et de la récupération des données.";
-        });
-}
-</script></div>
+        <div></div>
     </div>
     <script src="assets/bootstrap/js/bootstrap.min.js"></script>
 </body>
