@@ -190,6 +190,7 @@
   padding: 5px;
   width: 225px;
   text-align: left;
+  pointer-events: none;
 }
 
 .date-picker-1 {

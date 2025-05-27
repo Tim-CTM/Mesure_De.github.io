@@ -5,7 +5,7 @@
   border-radius: 0.5rem;
   height: 56px;
   position: relative;
-  color: black;
+  color: #ffffff;
   font-size: 1rem;
   font-weight: 600;
   border: 4px solid white;
@@ -59,27 +59,10 @@
 
 .container_export {
   display: flex;
-  flex-direction: row-reverse;
   margin-right: 20px;
+  margin-bottom: 20px;
   height: 100px;
-}
-
-.container_export button {
-  width: 120px;
-  height: 60px;
-  margin-left: 20px;
-  border-radius: 10px;
-  border: none;
-}
-
-.PDF {
-  color: white;
-  background-color: red;
-}
-
-.CSV {
-  color: white;
-  background-color: #379a37;
+  flex-direction: row-reverse;
 }
 
 .chart-container1 {
@@ -92,5 +75,75 @@
 .chart-container1 canvas {
   width: 100% !important;
   height: 100% !important;
+}
+
+.button {
+  --main-focus: #2d8cf0;
+  --font-color: #dedede;
+  --bg-color-sub: #222;
+  --bg-color: #323232;
+  --main-color: #959393;
+  position: relative;
+  width: 150px;
+  height: 40px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  border: 2px solid var(--main-color);
+  box-shadow: 4px 4px var(--main-color);
+  background-color: var(--bg-color);
+  border-radius: 10px;
+  overflow: hidden;
+  margin: 10px;
+}
+
+.button, .button__icon, .button__text {
+  transition: all 0.3s;
+}
+
+.button .button__text {
+  transform: translateX(21px);
+  color: var(--font-color);
+  font-weight: 600;
+}
+
+.button .button__icon {
+  position: absolute;
+  transform: translateX(109px);
+  height: 100%;
+  width: 31px;
+  background-color: var(--bg-color-sub);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.button .svg {
+  width: 20px;
+  fill: var(--main-color);
+}
+
+.button:hover {
+  background: var(--bg-color);
+}
+
+.button:hover .button__text {
+  color: transparent;
+}
+
+.button:hover .button__icon {
+  width: 148px;
+  transform: translateX(0);
+}
+
+.button:active {
+  transform: translate(3px, 3px);
+  box-shadow: 0px 0px var(--main-color);
+}
+
+.button-container {
+  display: flex;
+  gap: 10px;
+  padding: 10px;
 }
 

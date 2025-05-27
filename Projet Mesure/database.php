@@ -19,7 +19,7 @@ $result = $conn->query($sql);
 //Tableau pour stocker les totaux par jour
 $sumPerDays = array();
 
-// Vérification s'il y a des résultats
+// Vérification si il y a des résultats
 if ($result->num_rows > 0) {
     while ($row = $result->fetch_assoc())
     {
@@ -27,7 +27,7 @@ if ($result->num_rows > 0) {
         $valeur = floatval($row["Valeur_Mesure"]);
         $datePart = substr($timestamp, 0, 10); //Les 10 premiers caractère donc la date ex : 2025-05-12
 
-        // Addition des valeurs pour chaque jour de la BDD
+        // Addition des valeurs pour chaque jour
         if (isset($sumPerDays[$datePart])) {
             $sumPerDays[$datePart] += $valeur;
         } else {

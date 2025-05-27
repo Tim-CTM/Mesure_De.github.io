@@ -267,8 +267,7 @@
             window.location.href = url;
         });
     });
-</script>
-</div>
+</script></div>
 
 <script>
     document.getElementById("Aperçu_graph").addEventListener("click", function()
@@ -289,13 +288,15 @@
 </div>
 
 <script>
-function testerConnexion() {
+function testerConnexion() 
+    {
     var resultatDiv = document.getElementById("resultat");
     resultatDiv.innerHTML = "En cours de test...";
 
     fetch('database.php')
         .then(response => {
-            if (!response.ok) {
+            if (!response.ok) 
+            {
                 throw new Error(`Erreur HTTP! statut: ${response.status}`);
             }
             return response.json();
@@ -307,18 +308,25 @@ function testerConnexion() {
                 const datePart = item.timestamp ? item.timestamp.substring(0, 10) : 'N/A';
                 const valeur = parseFloat(item.valeur);
 
-                if (datePart !== 'N/A' && !isNaN(valeur)) {
+                if (datePart !== 'N/A' && !isNaN(valeur)) 
+                {
                     sumsByDate[datePart] = (sumsByDate[datePart] || 0) + valeur;
-                } else if (isNaN(valeur)) {
+                } 
+                else if (isNaN(valeur)) 
+                {
                     console.warn(`Valeur non numérique ignorée pour la date: ${datePart}`);
                 }
             });
 
             let output = "";
-            if (Object.keys(sumsByDate).length === 0) {
+            if (Object.keys(sumsByDate).length === 0) 
+            {
                 output = "Aucune donnée trouvée.";
-            } else {
-                for (const date in sumsByDate) {
+            }
+            else 
+            {
+                for (const date in sumsByDate) 
+                {
                     output += `<div>Date: ${date}, Somme des valeurs: ${sumsByDate[date].toFixed(4)}</div>`;
                 }
             }

@@ -47,11 +47,13 @@
     <canvas id="chartafter"></canvas>
 </div>
 
+<div id="comparison" class="date-summary"></div>
+
 <script>
     const ctxBefore = document.getElementById('chartbefore').getContext('2d');
     const ctxAfter = document.getElementById('chartafter').getContext('2d');
-    let chartbefore;
-    let chartafter;
+    let chartBefore;
+    let chartAfter;
     let allData = {}; // Toutes les informations de la BDD sont ici
 
     function updateChart(ctx, chartInstance, startDate, endDate, label) {
@@ -67,13 +69,12 @@
         const values = labels.map(date => filteredData[date]);
 
         // Si le graphique existe déjà, mettez simplement à jour ses données
-        // et ne le recréez pas, sauf vraiment utile
         if (chartInstance) {
             chartInstance.data.labels = labels;
             chartInstance.data.datasets[0].label = `Consommation en kWh (${label})`;
             chartInstance.data.datasets[0].data = values;
             chartInstance.update();
-            return chartInstance; // Retourne l'instance existante
+            return chartInstance;
         } else {
             // Sinon, créez le graphique pour la première fois
             return new Chart(ctx, {
@@ -103,7 +104,7 @@
                     },
                     scales: {
                         y: {
-                            beginAtZero: true, //Commence à 0
+                            beginAtZero: true, // Commence à 0
                             title: {
                                 display: true,
                                 text: 'kWh'
@@ -119,8 +120,34 @@
             });
         }
     }
+    //Calcule et affiche somme
+    function calculateAndDisplaySum() {
+        // Vérifiez si les graphiques sont initialisés
+        if (chartBefore && chartAfter) {
+            // Extraire les valeurs des graphiques
+            const beforeValues = chartBefore.data.datasets[0].data;
+            const afterValues = chartAfter.data.datasets[0].data;
 
-    //Récupérer les données et initialiser/met à jour les graphiques
+            // Calculer la somme des valeurs
+            const sumBefore = beforeValues.reduce((a, b) => a + b, 0);
+            const sumAfter = afterValues.reduce((a, b) => a + b, 0);
+
+            // Calculer la différence en pourcentage
+            const percentageDifference = ((sumAfter - sumBefore) / sumBefore) * 100;
+
+            // Afficher la somme dans la div "comparison"
+            const comparisonDiv = document.getElementById('comparison');
+            comparisonDiv.innerHTML = `
+                <p>Total avant travaux : ${sumBefore.toFixed(2)} kWh</p>
+                <p>Total après travaux : ${sumAfter.toFixed(2)} kWh</p>
+                <p>Économie en pourcentage de : ${percentageDifference.toFixed(2)}%</p>
+            `;
+        } else {
+            console.log("Les graphiques ne sont pas encore initialisés.");
+        }
+    }
+
+    // Récupérer les données et initialiser/met à jour les graphiques
     function getDataAndInitCharts() {
         fetch('database.php')
             .then(response => {
@@ -130,20 +157,20 @@
                 return response.json();
             })
             .then(data => {
-                const SumsDate = {};
+                const sumsByDate = {};
                 data.forEach(item => {
                     const datePart = item.timestamp ? item.timestamp.substring(0, 10) : 'N/A';
-                    const valeur = parseFloat(item.valeur);
+                    const value = parseFloat(item.valeur);
 
-                    if (datePart !== 'N/A' && !isNaN(valeur)) {
-                        if (SumsDate[datePart]) {
-                            SumsDate[datePart] += valeur;
+                    if (datePart !== 'N/A' && !isNaN(value)) {
+                        if (sumsByDate[datePart]) {
+                            sumsByDate[datePart] += value;
                         } else {
-                            SumsDate[datePart] = valeur;
+                            sumsByDate[datePart] = value;
                         }
                     }
                 });
-                allData = SumsDate;
+                allData = sumsByDate;
 
                 const urlParams = new URLSearchParams(window.location.search);
                 const dateBeforeParam = urlParams.get('dateAvant'); // Garde le nom du paramètre URL
@@ -154,18 +181,18 @@
                 if (dateBeforeParam) {
                     const [startBefore, endBefore] = dateBeforeParam.split(' - ');
                     if (startBefore && endBefore) {
-                        const dateBeforeDebut = moment(startBefore, 'DD/MM/YYYY');
-                        const dateBeforeFin = moment(endBefore, 'DD/MM/YYYY');
-                        chartbefore = updateChart(ctxBefore, chartbefore, dateBeforeDebut, dateBeforeFin, 'Avant travaux');
+                        const startDateBefore = moment(startBefore, 'DD/MM/YYYY');
+                        const endDateBefore = moment(endBefore, 'DD/MM/YYYY');
+                        chartBefore = updateChart(ctxBefore, chartBefore, startDateBefore, endDateBefore, 'Avant travaux');
                         if (canvasBeforeElement) canvasBeforeElement.style.display = 'block';
                     } else {
-                        if (chartbefore) chartbefore.destroy();
-                        chartbefore = null;
+                        if (chartBefore) chartBefore.destroy();
+                        chartBefore = null;
                         if (canvasBeforeElement) canvasBeforeElement.style.display = 'none';
                     }
                 } else {
-                    if (chartbefore) chartbefore.destroy();
-                    chartbefore = null;
+                    if (chartBefore) chartBefore.destroy();
+                    chartBefore = null;
                     if (canvasBeforeElement) canvasBeforeElement.style.display = 'none';
                 }
 
@@ -174,31 +201,34 @@
                 if (dateAfterParam) {
                     const [startAfter, endAfter] = dateAfterParam.split(' - ');
                     if (startAfter && endAfter) {
-                        const dateAfterDebut = moment(startAfter, 'DD/MM/YYYY');
-                        const dateAfterFin = moment(endAfter, 'DD/MM/YYYY');
-                        chartafter = updateChart(ctxAfter, chartafter, dateAfterDebut, dateAfterFin, 'Après travaux');
+                        const startDateAfter = moment(startAfter, 'DD/MM/YYYY');
+                        const endDateAfter = moment(endAfter, 'DD/MM/YYYY');
+                        chartAfter = updateChart(ctxAfter, chartAfter, startDateAfter, endDateAfter, 'Après travaux');
                         if (canvasAfterElement) canvasAfterElement.style.display = 'block';
                     } else {
-                        if (chartafter) chartafter.destroy();
-                        chartafter = null;
+                        if (chartAfter) chartAfter.destroy();
+                        chartAfter = null;
                         if (canvasAfterElement) canvasAfterElement.style.display = 'none';
                     }
                 } else {
-                    if (chartafter) chartafter.destroy();
-                    chartafter = null;
+                    if (chartAfter) chartAfter.destroy();
+                    chartAfter = null;
                     if (canvasAfterElement) canvasAfterElement.style.display = 'none';
                 }
+
+                // Appeler la fonction pour calculer et afficher la somme
+                calculateAndDisplaySum();
             })
             .catch(error => {
                 console.error('Erreur lors de la récupération des données:', error);
-                // Si une erreur se produit, assure que les canvas sont affichés et que les variables de chart sont nulles pour éviter des erreurs futures.
-                if (chartbefore) chartbefore.destroy();
-                chartbefore = null;
+                // Si une erreur se produit, cache les canvas et réinitialise les graphiques
+                if (chartBefore) chartBefore.destroy();
+                chartBefore = null;
                 const canvasBeforeElement = document.getElementById('chartbefore');
                 if (canvasBeforeElement) canvasBeforeElement.style.display = 'none';
 
-                if (chartafter) chartafter.destroy();
-                chartafter = null;
+                if (chartAfter) chartAfter.destroy();
+                chartAfter = null;
                 const canvasAfterElement = document.getElementById('chartafter');
                 if (canvasAfterElement) canvasAfterElement.style.display = 'none';
             });
@@ -206,11 +236,11 @@
 
     // Redimensionnement de la fenêtre
     function handleResize() {
-        if (chartbefore) {
-            chartbefore.resize(); //Redimensionne le graphique avant travaux
+        if (chartBefore) {
+            chartBefore.resize(); //Redimensionne le graphique avant travaux
         }
-        if (chartafter) {
-            chartafter.resize();
+        if (chartAfter) {
+            chartAfter.resize();
         }
         getDataAndInitCharts();
     }
@@ -221,54 +251,87 @@
 </script></div>
     <div class="container_export"><script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
-<div>
-    <button class='PDF' id="PDF">PDF</button>
-    <button class='CSV' id="CSV">CSV</button>
+<div class="button-container">
+    <button type="button" class="button" id="PDF">
+        <span class="button__text">PDF</span>
+        <span class="button__icon">
+            <svg class="svg" data-name="Layer 2" id="bdd05811-e15d-428c-bb53-8661459f9307" viewBox="0 0 35 35" xmlns="http://www.w3.org/2000/svg">
+                <path d="M17.5,22.131a1.249,1.249,0,0,1-1.25-1.25V2.187a1.25,1.25,0,0,1,2.5,0V20.881A1.25,1.25,0,0,1,17.5,22.131Z"></path>
+                <path d="M17.5,22.693a3.189,3.189,0,0,1-2.262-.936L8.487,15.006a1.249,1.249,0,0,1,1.767-1.767l6.751,6.751a.7.7,0,0,0,.99,0l6.751-6.751a1.25,1.25,0,0,1,1.768,1.767l-6.752,6.751A3.191,3.191,0,0,1,17.5,22.693Z"></path>
+                <path d="M31.436,34.063H3.564A3.318,3.318,0,0,1,.25,30.749V22.011a1.25,1.25,0,0,1,2.5,0v8.738a.815.815,0,0,0,.814.814H31.436a.815.815,0,0,0,.814-.814V22.011a1.25,1.25,0,1,1,2.5,0v8.738A3.318,3.318,0,0,1,31.436,34.063Z"></path>
+            </svg>
+        </span>
+    </button>
+
+    <button type="button" class="button" id="CSV">
+        <span class="button__text">CSV</span>
+        <span class="button__icon">
+            <svg class="svg" data-name="Layer 2" id="bdd05811-e15d-428c-bb53-8661459f9307" viewBox="0 0 35 35" xmlns="http://www.w3.org/2000/svg">
+                <path d="M17.5,22.131a1.249,1.249,0,0,1-1.25-1.25V2.187a1.25,1.25,0,0,1,2.5,0V20.881A1.25,1.25,0,0,1,17.5,22.131Z"></path>
+                <path d="M17.5,22.693a3.189,3.189,0,0,1-2.262-.936L8.487,15.006a1.249,1.249,0,0,1,1.767-1.767l6.751,6.751a.7.7,0,0,0,.99,0l6.751-6.751a1.25,1.25,0,0,1,1.768,1.767l-6.752,6.751A3.191,3.191,0,0,1,17.5,22.693Z"></path>
+                <path d="M31.436,34.063H3.564A3.318,3.318,0,0,1,.25,30.749V22.011a1.25,1.25,0,0,1,2.5,0v8.738a.815.815,0,0,0,.814.814H31.436a.815.815,0,0,0,.814-.814V22.011a1.25,1.25,0,1,1,2.5,0v8.738A3.318,3.318,0,0,1,31.436,34.063Z"></path>
+            </svg>
+        </span>
+    </button>
 </div>
 
 <script>
     //Exportation
-    document.getElementById('PDF').addEventListener('click', function() {
+    document.getElementById('PDF').addEventListener('click', function() 
+    {
         exportToPDF();
     });
 
-    document.getElementById('CSV').addEventListener('click', function() {
+    document.getElementById('CSV').addEventListener('click', function() 
+    { 
         exportToCSV();
     });
 
-    function exportToPDF() {
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF('landscape'); // Paysage
-        const canvasAvant = document.getElementById('chartbefore');
-        const canvasApres = document.getElementById('chartafter');
-        let yPosition = 20; // Position verticale initiale pour le premier graphique
-        const margin = 10;
-        const imgWidth = 250; // Largeur de l'image dans le PDF
+function exportToPDF() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF('landscape');
+    const canvasAvant = document.getElementById('chartbefore');
+    const canvasApres = document.getElementById('chartafter');
+    const comparisonDiv = document.getElementById('comparison');
 
-        // Vérifiez et ajoutez le premier graphique ("Avant-travaux")
-        if (canvasAvant && canvasAvant.style.display !== 'none') {
-            const imgDataAvant = canvasAvant.toDataURL('image/png');
-            const imgHeightAvant = (canvasAvant.height * imgWidth) / canvasAvant.width;
-            doc.addImage(imgDataAvant, 'PNG', margin, yPosition, imgWidth, imgHeightAvant);
-            yPosition += imgHeightAvant + margin; // Augmenter la position pour le graphique suivant
-        } else {
-            console.log('Canvas "chartbefore" non trouvé ou caché.');
-        }
+    const margin = 10;
+    const imgWidth = 250;
+    let yPosition = 20;
 
-        // Vérifiez et ajoutez le deuxième graphique ("Après-travaux")
-        if (canvasApres && canvasApres.style.display !== 'none') {
-            const imgDataApres = canvasApres.toDataURL('image/png');
-            const imgHeightApres = (canvasApres.height * imgWidth) / canvasApres.width;
-            doc.addImage(imgDataApres, 'PNG', margin, yPosition, imgWidth, imgHeightApres);
-        } else {
-            console.log('Canvas "chartafter" non trouvé ou caché.');
-        }
-
-        doc.save('graphiques.pdf');
+    // Ajouter le graphique "avant"
+    if (canvasAvant && canvasAvant.style.display !== 'none') {
+        const imgDataAvant = canvasAvant.toDataURL('image/png');
+        const imgHeightAvant = (canvasAvant.height * imgWidth) / canvasAvant.width;
+        doc.addImage(imgDataAvant, 'PNG', margin, yPosition, imgWidth, imgHeightAvant);
+        yPosition += imgHeightAvant + margin;
     }
 
-    function exportToCSV() {
+    // Ajouter le graphique "après"
+    if (canvasApres && canvasApres.style.display !== 'none') {
+        const imgDataApres = canvasApres.toDataURL('image/png');
+        const imgHeightApres = (canvasApres.height * imgWidth) / canvasApres.width;
+        doc.addImage(imgDataApres, 'PNG', margin, yPosition, imgWidth, imgHeightApres);
+        yPosition += imgHeightApres + margin;
+    }
+
+    // Ajouter la div de comparaison avec html2canvas
+    if (comparisonDiv) {
+        html2canvas(comparisonDiv).then(canvas => {
+            const imgDataComparison = canvas.toDataURL('image/png');
+            const imgHeightComparison = (canvas.height * imgWidth) / canvas.width;
+            doc.addImage(imgDataComparison, 'PNG', margin, yPosition, imgWidth, imgHeightComparison);
+            doc.save('graphiques_et_comparaison.pdf');
+        });
+    } else {
+        doc.save('graphiques.pdf');
+    }
+}
+
+
+    function exportToCSV() 
+    {
         window.location.href = 'export-csv.php';
     }
 </script>
