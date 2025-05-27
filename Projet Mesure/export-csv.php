@@ -1,10 +1,10 @@
 <?php
-$serveur = "192.168.17.10";
-$utilisateur = "root";
-$mot_de_passe = "lamp";
-$nom_base = "Mesure_De";
+$servername = "192.168.17.10";
+$username = "root";
+$password = "lamp";
+$dbname = "Mesure_De";
 
-$connexion = new mysqli($serveur, $utilisateur, $mot_de_passe, $nom_base);
+$conn = new mysqli($servername, $username, $password, $dbname);
 
 if ($connexion->connect_error) 
 {
