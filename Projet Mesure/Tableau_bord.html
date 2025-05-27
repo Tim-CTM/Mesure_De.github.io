@@ -133,60 +133,53 @@
     }
 
     function getDataAndUpdateChart() {
-        // On récupère les données depuis 'database.php'
-        fetch('database.php')
-            // Lorsque la réponse est reçue, elle est analysée au format JSON
-            .then(response => {
-                if (!response.ok) { // Vérifie si la réponse HTTP est OK (statut 200)
-                    throw new Error(`Erreur HTTP: ${response.status}`);
-                }
-                return response.json();
-            })
-            .then(data => {
-                // On stocke la somme des valeurs par date
-                const SommeDate = {};
-                // Parcourt chaque élément des données récupérées
-                data.forEach(item => {
-                    const datePart = item.timestamp ? item.timestamp.substring(0, 10) : 'N/A';
-                    const valeur = parseFloat(item.valeur);
+    fetch('database.php')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Erreur HTTP: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            const SommeDate = {};
+            data.forEach(item => {
+                const datePart = item.timestamp ? item.timestamp.substring(0, 10) : 'N/A';
+                const valeur = parseFloat(item.valeur);
 
-                    if (datePart !== 'N/A' && !isNaN(valeur)) { // Ajout de vérification isNaN
-                        if (SommeDate[datePart]) {
-                            SommeDate[datePart] += valeur;
-                        } else {
-                            SommeDate[datePart] = valeur;
-                        }
+                if (datePart !== 'N/A' && !isNaN(valeur)) {
+                    if (SommeDate[datePart]) {
+                        SommeDate[datePart] += valeur;
+                    } else {
+                        SommeDate[datePart] = valeur;
                     }
-                });
-                allData = SommeDate; // Stocke les données agrégées
-
-                // Récupère les paramètres de l'URL
-                const urlParams = new URLSearchParams(window.location.search);
-                const dateParam = urlParams.get('date');
-
-                if (dateParam) {
-                    const [start, end] = dateParam.split(' - ');
-                    const startDate = moment(start, 'DD/MM/YYYY');
-                    const endDate = moment(end, 'DD/MM/YYYY');
-                    updateChart(startDate, endDate);
-                } else {
-                    // Si le paramètre 'date' n'est pas présent, affiche toutes les données par défaut
-                    const endDate = moment();
-                    // Une date très lointaine pour inclure toutes les données si aucune plage n'est spécifiée
-                    const startDate = moment('1970-01-01');
-                    updateChart(startDate, endDate);
-                }
-            })
-            .catch(error => {
-                console.error('Erreur lors de la récupération ou du traitement des données:', error);
-                // Si une erreur se produit (ex: database.php ne renvoie rien),
-                // Initialiser le graphique même avec des données vides pour qu'il s'affiche.
-                if (!chart) {
-                    updateChart(moment(), moment()); // Initialise un graphique vide
                 }
             });
-    }
+            allData = SommeDate; // Stocke les données agrégées
 
+            // Récupère les paramètres de l'URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const dateParam = urlParams.get('date');
+
+            if (dateParam) {
+                const [start, end] = dateParam.split(' - ');
+                const startDate = moment(start, 'DD/MM/YYYY');
+                const endDate = moment(end, 'DD/MM/YYYY');
+                updateChart(startDate, endDate);
+            } else {
+                // Si le paramètre 'date' n'est pas présent, affiche toutes les données par défaut
+                const endDate = moment();
+                const startDate = moment('1970-01-01');
+                updateChart(startDate, endDate);
+            }
+        })
+        .catch(error => {
+            console.error('Erreur lors de la récupération ou du traitement des données:', error);
+            // Si une erreur se produit, initialiser le graphique même avec des données vides
+            if (!chart) {
+                updateChart(moment(), moment()); // Initialise un graphique vide
+            }
+        });
+}
     // Lancement de la récupération des données et de l'affichage du graphique au chargement de la page
     document.addEventListener('DOMContentLoaded', getDataAndUpdateChart);
 </script></div>
