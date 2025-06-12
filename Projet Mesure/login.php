@@ -1,7 +1,7 @@
 <?php
-$servername = "192.168.17.10";
-$username = "root";
-$password_db = "lamp";
+$servername = "localhost";
+$username = "User";
+$password = "Chaise40140*";
 $dbname = "Mesure_De";
 
 // Définir le type de contenu en JSON
@@ -10,7 +10,7 @@ header('Content-Type: application/json');
 try
 {
     // Connexion à la base de données avec PDO
-    $pdo = new PDO("mysql:host=$servername;dbname=$dbname;charset=utf8", $username, $password_db);
+    $pdo = new PDO("mysql:host=$servername;dbname=$dbname;charset=utf8", $username, $password);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 } catch (PDOException $e) {
     echo json_encode(["success" => false, "message" => "Erreur de connexion à la base de données : " . $e->getMessage()]);

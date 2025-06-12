@@ -1,33 +1,43 @@
 <?php
-$servername = "192.168.17.10";
-$username = "root";
-$password = "lamp";
-$dbname = "Mesure_De";
+header('Content-Type: application/json');
+
+$servername = "217.182.60.210";
+$username = "etudiant";
+$password = "admincielir";
+$dbname = "Mesure_De"; 
 
 $conn = new mysqli($servername, $username, $password, $dbname);
-
-if ($conn->connect_error)
-{
-    die("La connexion a échoué : " . $conn->connect_error);
+// Vérifie si la connexion a échoué
+if ($conn->connect_error) {
+    echo json_encode(['error' => 'Échec de la connexion à la base de données : ' . $conn->connect_error]);
+    exit;
 }
+// Récupère l'ID du dispositif depuis les paramètres GET de l'URL
+$selectedDeviceId = isset($_GET['device_id']) ? intval($_GET['device_id']) : null;
 
 $sql = "SELECT Timestamp, Valeur_Mesure FROM Donnee_Mesurer";
 
-//Exécution de la requête SQL
+// Ajoute WHERE si un ID de dispositif est fourni
+if ($selectedDeviceId !== null) {
+    if ($selectedDeviceId == 1) {
+        $sql .= " WHERE ID_Dispositif_FK = 1";
+    } else {
+        $sql .= " WHERE ID_Dispositif_FK != 1";
+    }
+}
+
+$sql .= " ORDER BY Timestamp ASC";
+// Execute requete SQL
 $result = $conn->query($sql);
 
-//Tableau pour stocker les totaux par jour
 $sumPerDays = array();
-
-// Vérification si il y a des résultats
-if ($result->num_rows > 0) {
-    while ($row = $result->fetch_assoc())
-    {
+// Vérifie si la requête a renvoyé des résultats
+if ($result && $result->num_rows > 0) {
+    while ($row = $result->fetch_assoc()) {
         $timestamp = $row["Timestamp"];
         $valeur = floatval($row["Valeur_Mesure"]);
-        $datePart = substr($timestamp, 0, 10); //Les 10 premiers caractère donc la date ex : 2025-05-12
-
-        // Addition des valeurs pour chaque jour
+        $datePart = substr($timestamp, 0, 10);
+        //Somme des valeurs par jour
         if (isset($sumPerDays[$datePart])) {
             $sumPerDays[$datePart] += $valeur;
         } else {
@@ -35,17 +45,15 @@ if ($result->num_rows > 0) {
         }
     }
 }
-
-//Tableau de sortie au format JSON
+// Prépare le tableau de sortie au format JSON
 $output = array();
 foreach ($sumPerDays as $date => $sum) {
     $output[] = array(
-        "timestamp" => $date, //Nouveau tableau associatif
-        "valeur" => $sum //La somme des mesures pour cette date
+        "timestamp" => $date,
+        "valeur" => $sum 
     );
 }
 
-header('Content-Type: application/json');
 echo json_encode($output);
 
 $conn->close();

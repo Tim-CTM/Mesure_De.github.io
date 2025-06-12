@@ -15,7 +15,128 @@
     <div class="page">
         <div class="container_h"><img src="assets/img/equans-smi.svg" width="230" height="110"></div>
         <div class="element">
-            <div class="icon"><button class="btn parametre-btn" type=""><span class="bar bar1"></span><span class="bar bar2"></span><span class="bar bar3"></span></button></div>
+            <div class="icon"><button class="btn parametre-btn" type="button" id="menuButton">
+    <span class="bar bar1"></span>
+    <span class="bar bar2"></span>
+    <span class="bar bar3"></span>
+</button>
+
+<div id="dropdownMenu" style="display: none; border: 2px solid rgb(110,187,148); padding: 10px; background-color: white;">
+    <button class="dropdown-item" data-device-id="1">Dispositif 1</button>
+    <button class="dropdown-item" data-device-id="2">Dispositif 2</button>
+</div>
+
+<script>
+    const menuButton = document.getElementById('menuButton');
+    const dropdownMenu = document.getElementById('dropdownMenu');
+    const dropdownItems = document.querySelectorAll('.dropdown-item');
+
+
+     //Gère la sélection d'un dispositif dans le menu déroulant.
+     //Met à jour la classe 'selected' et appelle les fonctions de mise à jour du graphique et du message.
+
+    function selectDevice(deviceElement) 
+    {
+        // Supprime la classe 'selected' de tous les éléments du menu
+        dropdownItems.forEach(otherItem => {
+            otherItem.classList.remove('selected');
+        });
+        // Ajoute la classe 'selected' à l'élément cliqué
+        deviceElement.classList.add('selected');
+
+        const selectedDeviceId = deviceElement.getAttribute('data-device-id');
+        const selectedDeviceName = deviceElement.textContent;
+
+        console.log('Dispositif sélectionné :', selectedDeviceName, '(ID:', selectedDeviceId + ')');
+
+        // Met à jour le graphique avec l'ID du dispositif sélectionné
+        if (typeof window.updateChartForSelectedDevice === 'function') 
+        {
+            window.updateChartForSelectedDevice(selectedDeviceId);
+        } 
+        else 
+        {
+            console.warn("La fonction updateChartForSelectedDevice n'est pas encore disponible.");
+        }
+
+        // Met à jour le message affiché pour le dispositif sélectionné
+        if (typeof window.updateDisplayMessage === 'function') 
+        {
+            window.updateDisplayMessage(selectedDeviceId, selectedDeviceName);
+        } 
+        else 
+        {
+            console.warn("La fonction updateDisplayMessage n'est pas encore disponible.");
+        }
+
+        // Cache le menu déroulant après la sélection
+        dropdownMenu.style.display = 'none';
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        menuButton.addEventListener('click', function() {
+            if (dropdownMenu.style.display === 'none') {
+                dropdownMenu.style.display = 'block';
+            } else {
+                dropdownMenu.style.display = 'none';
+            }
+        });
+
+        dropdownItems.forEach(item => {
+            item.addEventListener('click', function() {
+                selectDevice(this);
+            });
+        });
+
+        document.addEventListener('click', function(event) {
+            if (!menuButton.contains(event.target) && !dropdownMenu.contains(event.target)) {
+                dropdownMenu.style.display = 'none';
+            }
+        });
+
+        // Sélectionne le dispositif par défaut (Dispositif 1) au chargement de la page
+        const defaultDevice = document.querySelector('.dropdown-item[data-device-id="1"]');
+        if (defaultDevice) 
+        {
+            selectDevice(defaultDevice);
+        } 
+        else 
+        {
+            console.log("Aucun dispositif par défaut trouvé avec data-device-id='1'.");
+        }
+    });
+</script></div>
+            <div><p id="messageDuDeuxiemeScript" style="margin-left: 20px; margin-top: 20px; font-weight: bold; color: #333;"></p>
+
+<script>
+    //Met à jour le message affiché sur la page avec le nom du dispositif sélectionné.
+    window.updateDisplayMessage = function(deviceId, deviceName) {
+        console.log("Message reçu dans le script de gestion de message !");
+        console.log("Dispositif sélectionné :", deviceName, "(ID:", deviceId + ")");
+
+        const messageContainer = document.getElementById('messageDuDeuxiemeScript');
+        if (messageContainer) 
+        {
+            messageContainer.textContent = `${deviceName} `; // Met à jour le texte
+            messageContainer.style.color = 'green'; // Change la couleur du texte
+        } 
+        else 
+        {
+            console.warn("L'élément avec l'ID 'messageDuDeuxiemeScript' n'a pas été trouvé.");
+        }
+    };
+
+    // Initialisation du message au chargement de la page
+    document.addEventListener('DOMContentLoaded', function() {
+        const messageContainer = document.getElementById('messageDuDeuxiemeScript');
+        // Si le conteneur existe et qu'il est vide, on y met un message par défaut
+        if (messageContainer && !messageContainer.textContent) 
+        {
+            messageContainer.textContent = "Aucun dispositif sélectionné pour le moment.";
+            messageContainer.style.color = 'gray';
+        }
+    });
+</script></div>
             <div class="content">
                 <div class="date-picker-group">
                     <div class="date-picker"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightpick@1.3.4/css/lightpick.min.css">
@@ -66,11 +187,18 @@
 
 <script>
     const ctx = document.getElementById('graphique').getContext('2d');
-    let chart; // Déclarez la variable 'chart' ici
-    let allData = {}; // Toutes les informations de la BDD sont ici
+    let chart; // Variable pour le graphique Chart.js
+    let allData = {}; // Stocke toutes les données de la base de données
 
+    let currentSelectedDeviceId = null; // ID du dispositif actuel
+
+    
+     //Met à jour le graphique avec les données filtrées par date.
+     //Cette fonction prend deux dates en entrée pour définir la période à afficher.
+     
     function updateChart(startDate, endDate) {
-        // Filtrer les données en fonction des dates de début et de fin
+
+        // Filtre les données globales (allData) selon la période sélectionnée
         const filteredData = Object.keys(allData)
             .filter(date => moment(date).isBetween(startDate, endDate, undefined, '[]'))
             .reduce((obj, key) => {
@@ -81,13 +209,13 @@
         const labels = Object.keys(filteredData);
         const values = labels.map(date => filteredData[date]);
 
-        // Si le graphique existe déjà, mettez simplement à jour ses données
+        // Met à jour le graphique existant ou en crée un nouveau s'il n'y en a pas
         if (chart) {
             chart.data.labels = labels;
             chart.data.datasets[0].data = values;
-            chart.update(); // Mettez à jour le graphique
+            chart.update(); // Rafraîchit le graphique pour montrer les nouvelles données
         } else {
-            // Sinon, créez le graphique pour la première fois
+            // Crée un nouveau graphique à barres
             chart = new Chart(ctx, {
                 type: 'bar',
                 data: {
@@ -104,10 +232,8 @@
                     }]
                 },
                 options: {
-                    //Options essentielles pour le redimensionnement automatique
                     responsive: true,
-                    maintainAspectRatio: false, // Ne pas maintenir le rapport hauteur et largeur
-
+                    maintainAspectRatio: false,
                     plugins: {
                         legend: {
                             onClick: null
@@ -132,76 +258,105 @@
         }
     }
 
-    function getDataAndUpdateChart() {
-    fetch('database.php')
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`Erreur HTTP: ${response.status}`);
-            }
-            return response.json();
-        })
-        .then(data => {
-            const Sumsdate = {};
-            data.forEach(item => {
-                const datePart = item.timestamp ? item.timestamp.substring(0, 10) : 'N/A';
-                const valeur = parseFloat(item.valeur);
+    
+     //Récupère les données de consommation depuis le serveur PHP.
+     //Cette fonction met à jour 'allData' et déclenche ensuite la mise à jour du graphique.
+     
+    window.getDataAndUpdateChart = function(deviceId = currentSelectedDeviceId) {
+        // 'deviceId' est l'ID du dispositif pour lequel récupérer les données.
+        // Par défaut, elle utilise l'ID du dispositif actuellement sélectionné.
 
-                if (datePart !== 'N/A' && !isNaN(valeur)) {
-                    if (Sumsdate[datePart]) {
-                        Sumsdate[datePart] += valeur;
-                    } else {
-                        Sumsdate[datePart] = valeur;
-                    }
+        let url = 'database.php'; 
+        if (deviceId !== null) {
+            url += `?device_id=${deviceId}`; // Ajoute l'ID du dispositif aux paramètres de l'URL pour filtrer les données
+        }
+
+        fetch(url) // Envoie une requête au script PHP pour obtenir les données
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`Erreur HTTP: ${response.status}`);
+                }
+                return response.json(); // Convertit la réponse en format JSON
+            })
+            .then(data => {
+                // Transforme les données reçues en un objet, où chaque clé est une date et la valeur est la consommation de ce jour
+                allData = data.reduce((acc, item) => {
+                    acc[item.timestamp] = item.valeur;
+                    return acc;
+                }, {});
+
+                // Vérifie si une période de date est spécifiée dans l'URL (par exemple, si l'utilisateur a sélectionné des dates)
+                const urlParams = new URLSearchParams(window.location.search);
+                const dateParam = urlParams.get('date');
+
+                if (dateParam) {
+                    // Si une date est dans l'URL, on l'utilise pour filtrer et afficher le graphique sur cette période
+                    const [start, end] = dateParam.split(' - ');
+                    const startDate = moment(start, 'DD/MM/YYYY');
+                    const endDate = moment(end, 'DD/MM/YYYY');
+                    updateChart(startDate, endDate);
+                } else {
+                    // Sinon, on affiche toutes les données disponibles par défaut
+                    const endDate = moment(); // Date d'aujourd'hui
+                    const startDate = moment('1970-01-01'); // Une date très ancienne pour inclure toutes les données historiques
+                    updateChart(startDate, endDate);
+                }
+            })
+            .catch(error => {
+                console.error('Erreur de chargement des données du graphique :', error);
+                // Si une erreur survient, on initialise le graphique vide pour éviter les blocages de la page
+                if (!chart) {
+                    updateChart(moment(), moment()); 
                 }
             });
-            allData = Sumsdate; // Stocke les données agrégées
+    };
 
-            // Récupère les paramètres de l'URL
-            const urlParams = new URLSearchParams(window.location.search);
-            const dateParam = urlParams.get('date');
+    
+     //Fonction globale appelée par le sélecteur de dispositif (menu déroulant) pour mettre à jour le graphique.
+     //Elle met à jour l'ID du dispositif et recharge les données correspondantes.
+     
+    window.updateChartForSelectedDevice = function(deviceId) {
+        // 'deviceId' est l'ID du dispositif qui vient d'être sélectionné.
 
-            if (dateParam) {
-                const [start, end] = dateParam.split(' - ');
-                const startDate = moment(start, 'DD/MM/YYYY');
-                const endDate = moment(end, 'DD/MM/YYYY');
-                updateChart(startDate, endDate);
-            } else {
-                // Si le paramètre 'date' n'est pas présent, affiche toutes les données par défaut
-                const endDate = moment();
-                const startDate = moment('1970-01-01');
-                updateChart(startDate, endDate);
-            }
-        })
-        .catch(error => {
-            console.error('Erreur lors de la récupération ou du traitement des données:', error);
-            // Si une erreur se produit, initialiser le graphique même avec des données vides
-            if (!chart) {
-                updateChart(moment(), moment()); // Initialise un graphique vide
-            }
-        });
-}
-    // Lancement de la récupération des données et de l'affichage du graphique au chargement de la page
-    document.addEventListener('DOMContentLoaded', getDataAndUpdateChart);
+        currentSelectedDeviceId = deviceId; // Met à jour l'ID du dispositif actif pour les futures requêtes
+
+        console.log(`[Graphique] Dispositif ID: ${deviceId} sélectionné. Chargement des données.`);
+
+        window.getDataAndUpdateChart(deviceId); // Recharge les données depuis la base de données et met à jour le graphique
+    };
+
+    // Ce bloc de code s'exécute une fois que la page est entièrement chargée.
+    document.addEventListener('DOMContentLoaded', function() {
+        // Au chargement initial, on tente de trouver le "Dispositif 1" comme choix par défaut.
+        const defaultDeviceElement = document.querySelector('.dropdown-item[data-device-id="1"]');
+        if (defaultDeviceElement) {
+            // Si le "Dispositif 1" est trouvé, on utilise son ID comme dispositif à afficher par défaut.
+            currentSelectedDeviceId = defaultDeviceElement.getAttribute('data-device-id');
+        }
+        // Ensuite, on charge les données et on affiche le graphique pour la première fois avec le dispositif par défaut.
+        window.getDataAndUpdateChart(currentSelectedDeviceId);
+    });
 </script></div>
-        <div class="container_e">
-            <div class="container_DateColumn"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightpick@1.3.4/css/lightpick.min.css">
+        <div class="container_e"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightpick@1.3.4/css/lightpick.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/lightpick@1.3.4/lightpick.min.js"></script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-<div class="date-picker-1">
-    <label>Avant-travaux</label>
-    <div class="date-input_1">
-        <input type="text" id="dateRangePicker1">
-        <img src="assets/img/calender.webp" alt="Calendar Icon" id="calendarIcon1" style="cursor: pointer;">
+<div class="date-picker-column-wrapper">
+    <div class="date-picker-1">
+        <label>Avant-travaux</label>
+        <div class="date-input_1">
+            <input type="text" id="dateRangePicker1">
+            <img src="assets/img/calender.webp" alt="Calendar Icon" id="calendarIcon1" style="cursor: pointer;">
+        </div>
     </div>
-</div>
 
-<div class="date-picker-1">
-    <label>Après-travaux</label>
-    <div class="date-input_1">
-        <input type="text" id="dateRangePicker2">
-        <img src="assets/img/calender.webp" alt="Calendar Icon" id="calendarIcon2" style="cursor: pointer;">
+    <div class="date-picker-1">
+        <label>Après-travaux</label>
+        <div class="date-input_1">
+            <input type="text" id="dateRangePicker2">
+            <img src="assets/img/calender.webp" alt="Calendar Icon" id="calendarIcon2" style="cursor: pointer;">
+        </div>
     </div>
 </div>
 
@@ -210,57 +365,62 @@
 </div>
 
 <script>
+    // S'assure que le DOM est complètement chargé avant d'exécuter le script
     $(function(){
-        moment.locale('fr');
+        moment.locale('fr'); // Configure Moment.js en français
 
-        // Premier date picker
+        // --- Configuration du premier sélecteur de date (Avant-travaux) ---
         let dateRangePicker1 = document.getElementById('dateRangePicker1');
         let pickerRange1 = new Lightpick({
             field: dateRangePicker1,
-            singleDate: false,
+            singleDate: false, // Permet de sélectionner une plage de dates
             onSelect: function(start, end){
+                // Met à jour le champ de texte avec les dates sélectionnées
                 let str = '';
                 str += start ? start.format('DD/MM/YYYY') + ' - ' : '';
                 str += end ? end.format('DD/MM/YYYY') : '...';
                 dateRangePicker1.value = str;
             }
         });
-        //Quand je click sur l'icon j'affiche le calendrier
+        // Affiche le calendrier du premier sélecteur lorsque l'icône est cliquée
         document.getElementById('calendarIcon1').addEventListener('click', function(event) {
-            event.stopPropagation();
-            pickerRange1.show();
+            event.stopPropagation(); // Empêche l'événement de se propager (éviter les clics inattendus)
+            pickerRange1.show(); // Ouvre le calendrier
         });
 
-        //Deuxième date picker
+        // --- Configuration du deuxième sélecteur de date (Après-travaux) ---
         let dateRangePicker2 = document.getElementById('dateRangePicker2');
         let pickerRange2 = new Lightpick({
             field: dateRangePicker2,
-            singleDate: false,
+            singleDate: false, // Permet de sélectionner une plage de dates
             onSelect: function(start, end){
+                // Met à jour le champ de texte avec les dates sélectionnées
                 let str = '';
                 str += start ? start.format('DD/MM/YYYY') + ' - ' : '';
                 str += end ? end.format('DD/MM/YYYY') : '...';
                 dateRangePicker2.value = str;
             }
         });
-
+        // Affiche le calendrier du deuxième sélecteur lorsque l'icône est cliquée
         document.getElementById('calendarIcon2').addEventListener('click', function(event) {
-            event.stopPropagation();
-            pickerRange2.show();
+            event.stopPropagation(); // Empêche l'événement de se propager
+            pickerRange2.show(); // Ouvre le calendrier
         });
 
-        // Gestion du clic sur le bouton "Aperçu du graphique"
+        // --- Gestion du clic sur le bouton "Aperçu du graphique" ---
         document.getElementById("Aperçu_graph").addEventListener("click", function() {
             const datePicker1Value = document.getElementById('dateRangePicker1').value;
             const datePicker2Value = document.getElementById('dateRangePicker2').value;
 
-            // Construction de l'URL avec les paramètres
+            // Construit l'URL vers la page d'aperçu du graphique avec les dates sélectionnées comme paramètres
             const url = `Apercu_graphique.html?dateAvant=${encodeURIComponent(datePicker1Value)}&dateApres=${encodeURIComponent(datePicker2Value)}`;
-
+            
+            // Redirige le navigateur vers la nouvelle URL
             window.location.href = url;
         });
     });
-</script></div>
+</script>
+            <div class="container_DateColumn"></div>
 
 <script>
     document.getElementById("Aperçu_graph").addEventListener("click", function()

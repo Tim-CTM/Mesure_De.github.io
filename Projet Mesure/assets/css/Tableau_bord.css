@@ -92,6 +92,7 @@
   background-color: rgb(110,187,148);
   border-radius: 10px;
   margin-left: 150px;
+  border: 2px solid rgb(110,187,148);
 }
 
 .content {
@@ -155,17 +156,6 @@
 .container_e {
   display: flex;
   padding: 20px;
-  flex-direction: row-reverse;
-}
-
-.container_e button {
-  width: 200px;
-  height: 80px;
-  margin-right: 12px;
-  border-radius: 14px;
-  background-color: #6ebb94;
-  color: white;
-  border: none;
 }
 
 .date-input_1 img {
@@ -209,11 +199,6 @@
   flex-direction: column;
 }
 
-.checkgraph {
-  display: flex;
-  flex-direction: row-reverse;
-}
-
 .chart-container {
   position: relative;
   width: 100%;
@@ -224,5 +209,28 @@
 .chart-container canvas {
   width: 100% !important;
   height: 100% !important;
+}
+
+.dropdown-item {
+  display: block;
+  width: 100%;
+  padding: 8px 10px;
+  margin-bottom: 5px;
+  text-align: left;
+  border: 2px;
+  background-color: transparent;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: inherit;
+}
+
+.dropdown-item:hover {
+  background-color: #f0f0f0;
+}
+
+.dropdown-item.selected {
+  background-color: #e0e0e0;
+  border-color: rgb(110,187,148);
+  font-weight: bold;
 }
 
